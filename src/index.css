@@ -1,0 +1,115 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* -------------------------------------------------------------------------
+   Tokens da identidade visual. Para mudar as cores da marca, altere aqui.
+   ------------------------------------------------------------------------- */
+:root {
+  --navy-950: #071a30;
+  --navy-900: #0b2545;
+  --navy-800: #123459;
+  --navy-700: #1a4775;
+  --sky: #2f9be0;
+  --sky-light: #7cc8f8;
+  --sky-wash: #e6f3fc;
+
+  --bg: #ffffff;
+  --bg-app: #eef2f6;
+  --surface: #ffffff;
+  --surface-2: #f6f8fb;
+  --border: #dde4ec;
+  --text: #0e1c2c;
+  --muted: #5b6b7d;
+  --primary: var(--navy-900);
+  --primary-hover: var(--navy-800);
+  --primary-fg: #ffffff;
+  --accent: var(--sky);
+  --ring: #2f9be0;
+}
+
+.dark {
+  --bg: #061426;
+  --bg-app: #061426;
+  --surface: #0c2039;
+  --surface-2: #10294a;
+  --border: #1d3a5e;
+  --text: #e7eef7;
+  --muted: #93a6bd;
+  --primary: #4aaef0;
+  --primary-hover: #7cc8f8;
+  --primary-fg: #061426;
+  --accent: #7cc8f8;
+  --sky-wash: #0f2c4d;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Sora', ui-sans-serif, system-ui, sans-serif;
+
+  --color-navy-950: var(--navy-950);
+  --color-navy-900: var(--navy-900);
+  --color-navy-800: var(--navy-800);
+  --color-navy-700: var(--navy-700);
+  --color-brand-sky: var(--sky);
+  --color-brand-sky-light: var(--sky-light);
+  --color-sky-wash: var(--sky-wash);
+
+  --color-bg: var(--bg);
+  --color-bg-app: var(--bg-app);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--border);
+  --color-ink: var(--text);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-fg: var(--primary-fg);
+  --color-accent: var(--accent);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-bg font-sans text-ink antialiased;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  h1, h2, h3, h4 {
+    @apply font-display text-ink;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Animações discretas */
+@keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@keyframes track-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes stamp { 0% { opacity: 0; transform: scale(1.25) rotate(-8deg); } 60% { opacity: 1; transform: scale(0.96) rotate(-8deg); } 100% { opacity: 1; transform: scale(1) rotate(-8deg); } }
+.animate-fade-in { animation: fade-in 0.25s ease-out both; }
+
+/* Impressão dos detalhes do chamado */
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff !important; color: #000 !important; }
+  .print-area { box-shadow: none !important; border: 0 !important; }
+  main { padding: 0 !important; }
+}
