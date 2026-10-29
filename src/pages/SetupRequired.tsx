@@ -18,7 +18,7 @@ export default function SetupRequired() {
           <li>Preencha com a URL e a chave anon do seu projeto (Supabase › Project Settings › API).</li>
           <li>Reinicie o servidor com <code>npm run dev</code>.</li>
         </ol>
-        <p className="mt-4 text-sm text-muted">Na Cloudflare Pages, cadastre as mesmas variáveis em Settings › Environment variables e publique novamente.</p>
+        <p className="mt-4 text-sm text-muted">Na Cloudflare, cadastre as mesmas variáveis em Settings › Build › Variables and secrets e publique novamente.</p>
       </div>
     </div>
   )
