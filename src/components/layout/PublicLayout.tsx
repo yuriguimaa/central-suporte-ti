@@ -11,7 +11,8 @@ export function PublicHeader() {
     <header className="sticky top-0 z-30 border-b border-line/70 bg-bg/85 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
         <Link to="/" aria-label={`${brand.name}, página inicial`}>
-          <Logo />
+          <span className="sm:hidden"><Logo compact /></span>
+          <span className="hidden sm:block"><Logo /></span>
         </Link>
         <nav className="flex items-center gap-1.5 sm:gap-2">
           <ThemeToggle />

@@ -42,7 +42,7 @@ export default function ForgotPassword() {
         </Alert>
       ) : (
         <form onSubmit={submit} noValidate className="space-y-5">
-          <Input label="E-mail" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} error={error} autoFocus />
+          <Input label="E-mail" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} error={error} />
           <Button type="submit" size="lg" className="w-full" loading={loading}>
             Enviar link de recuperação
           </Button>

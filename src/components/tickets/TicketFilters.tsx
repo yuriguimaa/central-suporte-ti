@@ -23,9 +23,11 @@ export function TicketFilters({ value, onChange, users, hideStatus }: Props) {
         <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted" aria-hidden />
         <input
           type="search"
+          name="busca"
+          autoComplete="off"
           value={value.search ?? ''}
           onChange={(e) => set({ search: e.target.value })}
-          placeholder="Buscar nº do protocolo ou título"
+          placeholder="Buscar protocolo ou título…"
           className={`${controlClass} h-10 pl-9 text-sm`}
         />
       </label>

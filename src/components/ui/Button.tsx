@@ -2,7 +2,7 @@ import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react'
 import { Link, type LinkProps } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'accent'
+type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'accent' | 'onDark' | 'onDarkOutline'
 type Size = 'sm' | 'md' | 'lg'
 
 const base =
@@ -10,10 +10,12 @@ const base =
 
 const variants: Record<Variant, string> = {
   primary: 'bg-primary text-primary-fg hover:bg-primary-hover shadow-sm',
-  accent: 'bg-brand-sky text-white hover:bg-[#1f8ad0] shadow-sm',
+  accent: 'bg-brand-sky text-white hover:bg-navy-700 shadow-sm',
   secondary: 'border border-line bg-surface text-ink hover:border-brand-sky hover:text-primary',
   ghost: 'text-muted hover:bg-surface-2 hover:text-ink',
   danger: 'bg-red-600 text-white hover:bg-red-700 shadow-sm',
+  onDark: 'bg-brand-sky-light text-navy-950 hover:bg-white focus-visible:outline-white',
+  onDarkOutline: 'border border-white/30 text-white hover:border-white/70 hover:bg-white/5 focus-visible:outline-white',
 }
 
 const sizes: Record<Size, string> = {

@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
-import { friendlyError, isValidEmail } from '@/lib/validation'
+import { focusFirstInvalid, friendlyError, isValidEmail } from '@/lib/validation'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Field'
 import { Alert } from '@/components/ui/Feedback'
@@ -26,14 +26,15 @@ export default function Login() {
     }
   }, [])
 
-  const submit = async (e: FormEvent) => {
+  const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    const form = e.currentTarget
     const next: typeof errors = {}
     if (!isValidEmail(email)) next.email = 'Informe um e-mail válido.'
     if (!password) next.password = 'Informe sua senha.'
     setErrors(next)
     setFormError(null)
-    if (Object.keys(next).length) return
+    if (Object.keys(next).length) return focusFirstInvalid(form)
 
     setLoading(true)
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
@@ -66,7 +67,6 @@ export default function Login() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           error={errors.email}
-          autoFocus
         />
         <div>
           <Input

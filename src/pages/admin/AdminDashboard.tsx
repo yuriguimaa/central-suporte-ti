@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { CheckCircle2, CircleDot, Flame, Hourglass, Inbox, Lock, MessageCircleQuestion, Timer, Users } from 'lucide-react'
+import { Flame } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { CATEGORY, CATEGORY_ORDER, PRIORITY, PRIORITY_ORDER, PRIORITY_SHADE, STATUS, STATUS_ORDER } from '@/lib/constants'
 import { fetchTickets } from '@/lib/tickets'
-import { ticketCode, timeAgo } from '@/lib/format'
+import { timeAgo } from '@/lib/format'
 import { friendlyError } from '@/lib/validation'
 import { PageHeader } from '@/components/layout/AppShell'
 import { ButtonLink } from '@/components/ui/Button'
 import { Card, CardHeader } from '@/components/ui/Card'
-import { StatCard } from '@/components/ui/StatCard'
+import { StatStrip } from '@/components/ui/StatStrip'
 import { Alert, Spinner } from '@/components/ui/Feedback'
 import { ColumnChart, HBarList } from '@/components/ui/Charts'
-import { StatusBadge } from '@/components/ui/Badges'
+import { ProtocolTag, StatusBadge } from '@/components/ui/Badges'
 import { TicketTable } from '@/components/tickets/TicketTable'
 import type { DashboardStats, TicketWithOwner } from '@/types/database'
 
@@ -87,7 +87,7 @@ export default function AdminDashboard() {
             {urgent.map((t) => (
               <li key={t.id}>
                 <Link to={`/admin/chamados/${t.ticket_number}`} className="flex flex-wrap items-center gap-x-4 gap-y-1 px-5 py-3 hover:bg-surface-2">
-                  <span className="tabular text-sm font-semibold">{ticketCode(t.ticket_number)}</span>
+                  <ProtocolTag number={t.ticket_number} />
                   <span className="min-w-0 flex-1 truncate text-sm text-ink">{t.title}</span>
                   <span className="text-xs text-muted">{t.owner?.full_name} · aberto {timeAgo(t.created_at)}</span>
                   <StatusBadge status={t.status} />
@@ -98,20 +98,23 @@ export default function AdminDashboard() {
         </Card>
       )}
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-4">
-        <StatCard label="Total de chamados" value={stats?.total ?? null} icon={Inbox} to="/admin/chamados" />
-        <StatCard label="Abertos" value={stats ? s.aberto ?? 0 : null} icon={CircleDot} to="/admin/chamados?status=aberto" tone="bg-sky-50 text-sky-700 dark:bg-sky-500/10 dark:text-sky-300" />
-        <StatCard label="Em andamento" value={stats ? s.em_andamento ?? 0 : null} icon={Hourglass} to="/admin/chamados?status=em_andamento" tone="bg-amber-50 text-amber-700 dark:bg-amber-400/10 dark:text-amber-300" />
-        <StatCard label="Aguardando usuário" value={stats ? s.aguardando_usuario ?? 0 : null} icon={MessageCircleQuestion} to="/admin/chamados?status=aguardando_usuario" tone="bg-orange-50 text-orange-700 dark:bg-orange-500/10 dark:text-orange-300" />
-        <StatCard label="Resolvidos" value={stats ? s.resolvido ?? 0 : null} icon={CheckCircle2} to="/admin/chamados?status=resolvido" tone="bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300" />
-        <StatCard label="Encerrados" value={stats ? s.encerrado ?? 0 : null} icon={Lock} to="/admin/chamados?status=encerrado" tone="bg-slate-100 text-slate-700 dark:bg-slate-400/10 dark:text-slate-300" />
-        <StatCard label="Usuários cadastrados" value={stats?.users ?? null} icon={Users} to="/admin/usuarios" />
-        <StatCard
-          label="Tempo médio de solução"
-          value={stats ? (stats.avg_resolution_hours != null ? `${stats.avg_resolution_hours} h` : '—') : null}
-          icon={Timer}
-        />
-      </div>
+      <StatStrip
+        cols="lg:grid-cols-4"
+        items={[
+          { label: 'Total de chamados', value: stats?.total ?? null, to: '/admin/chamados' },
+          ...STATUS_ORDER.map((st) => ({
+            label: STATUS[st].label,
+            value: stats ? s[st] ?? 0 : null,
+            dot: STATUS[st].dot,
+            to: `/admin/chamados?status=${st}`,
+          })),
+          { label: 'Usuários cadastrados', value: stats?.users ?? null, to: '/admin/usuarios' },
+          {
+            label: 'Tempo médio de solução',
+            value: stats ? (stats.avg_resolution_hours != null ? `${stats.avg_resolution_hours.toLocaleString('pt-BR')} h` : '—') : null,
+          },
+        ]}
+      />
 
       {loading && !stats ? (
         <Spinner />

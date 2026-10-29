@@ -108,12 +108,14 @@ export default function AdminUsers() {
             <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted" />
             <input
               type="search"
+              name="busca-usuarios"
+              autoComplete="off"
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value)
                 setPage(1)
               }}
-              placeholder="Buscar por nome ou e-mail"
+              placeholder="Buscar por nome ou e-mail…"
               className={`${controlClass} h-10 pl-9 text-sm`}
             />
           </label>

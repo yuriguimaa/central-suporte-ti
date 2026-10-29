@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { CheckCircle2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
@@ -6,7 +6,7 @@ import { useToast } from '@/contexts/ToastContext'
 import { CATEGORY, CATEGORY_ORDER, PRIORITY, PRIORITY_ORDER } from '@/lib/constants'
 import { ticketCode } from '@/lib/format'
 import { uploadAttachments } from '@/lib/tickets'
-import { friendlyError } from '@/lib/validation'
+import { focusFirstInvalid, friendlyError } from '@/lib/validation'
 import { PageHeader } from '@/components/layout/AppShell'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -47,12 +47,22 @@ export default function NewTicket() {
     return e
   }
 
-  const submit = async (ev: FormEvent) => {
+  // Avisa antes de sair da página com o formulário preenchido.
+  const dirty = !created && !saving && !!(title || description || files.length)
+  useEffect(() => {
+    if (!dirty) return
+    const warn = (e: BeforeUnloadEvent) => e.preventDefault()
+    window.addEventListener('beforeunload', warn)
+    return () => window.removeEventListener('beforeunload', warn)
+  }, [dirty])
+
+  const submit = async (ev: FormEvent<HTMLFormElement>) => {
     ev.preventDefault()
+    const form = ev.currentTarget
     const e = validate()
     setErrors(e)
     setFormError(null)
-    if (Object.keys(e).length) return
+    if (Object.keys(e).length) return focusFirstInvalid(form)
 
     setSaving(true)
     const { data, error } = await supabase
@@ -115,12 +125,13 @@ export default function NewTicket() {
           {formError && <Alert>{formError}</Alert>}
           <Input
             label="Título do chamado"
-            placeholder="Ex.: Computador não liga"
+            placeholder="Ex.: Computador não liga…"
+            name="titulo"
+            autoComplete="off"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             error={errors.title}
             maxLength={150}
-            autoFocus
           />
           <div className="grid gap-5 sm:grid-cols-2">
             <Select label="Categoria" value={category} onChange={(e) => setCategory(e.target.value as TicketCategory)} error={errors.category}>
@@ -142,7 +153,7 @@ export default function NewTicket() {
           </div>
           <Textarea
             label="Descrição do problema"
-            placeholder="O que aconteceu? Desde quando? Aparece alguma mensagem de erro? Já tentou reiniciar?"
+            placeholder="O que aconteceu, desde quando, se aparece alguma mensagem de erro…"
             rows={7}
             value={description}
             onChange={(e) => setDescription(e.target.value)}

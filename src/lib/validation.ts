@@ -60,3 +60,8 @@ export function friendlyError(err: unknown): string {
   for (const [re, text] of map) if (re.test(msg)) return text
   return msg || 'Algo deu errado. Tente novamente.'
 }
+
+/** Move o foco para o primeiro campo com erro (após a renderização). */
+export function focusFirstInvalid(form: HTMLFormElement | null) {
+  requestAnimationFrame(() => form?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus())
+}

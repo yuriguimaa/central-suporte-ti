@@ -36,10 +36,10 @@ export function elapsed(fromIso: string, toIso?: string | null) {
 }
 
 export function formatBytes(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`
+  if (bytes < 1024) return `${bytes}\u00a0B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)}\u00a0KB`
   const mb = bytes / 1024 / 1024
-  return `${Number.isInteger(mb) ? mb : mb.toFixed(1)} MB`
+  return `${(Number.isInteger(mb) ? mb : Number(mb.toFixed(1))).toLocaleString('pt-BR')}\u00a0MB`
 }
 
 export function initials(name: string) {

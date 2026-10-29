@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { MailCheck } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import { friendlyError, isValidEmail, maskPhone, validatePassword, validatePhone } from '@/lib/validation'
+import { focusFirstInvalid, friendlyError, isValidEmail, maskPhone, validatePassword, validatePhone } from '@/lib/validation'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Field'
 import { Alert } from '@/components/ui/Feedback'
@@ -35,12 +35,13 @@ export default function Register() {
     return e
   }
 
-  const submit = async (ev: FormEvent) => {
+  const submit = async (ev: FormEvent<HTMLFormElement>) => {
     ev.preventDefault()
+    const form = ev.currentTarget
     const e = validate()
     setErrors(e)
     setFormError(null)
-    if (Object.keys(e).length) return
+    if (Object.keys(e).length) return focusFirstInvalid(form)
 
     setLoading(true)
     const email = form.email.trim().toLowerCase()
@@ -101,7 +102,7 @@ export default function Register() {
     >
       <form onSubmit={submit} noValidate className="space-y-4">
         {formError && <Alert>{formError}</Alert>}
-        <Input label="Nome completo" autoComplete="name" value={form.name} onChange={set('name')} error={errors.name} maxLength={120} autoFocus />
+        <Input label="Nome completo" autoComplete="name" value={form.name} onChange={set('name')} error={errors.name} maxLength={120} />
         <Input label="E-mail" type="email" inputMode="email" autoComplete="email" value={form.email} onChange={set('email')} error={errors.email} />
         <Input
           label="Telefone"

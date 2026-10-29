@@ -72,7 +72,6 @@ export default function ResetPassword() {
             onChange={(e) => setPassword(e.target.value)}
             error={errors.password}
             hint="Mínimo de 8 caracteres, com letras e números."
-            autoFocus
           />
           <Input
             label="Confirmar nova senha"

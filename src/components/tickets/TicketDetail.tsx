@@ -231,28 +231,37 @@ export function TicketDetail({ number, admin }: { number: number; admin: boolean
         </Button>
       </div>
 
-      {/* Cabeçalho do chamado */}
-      <Card className="mb-6 overflow-hidden">
-        <div className={`h-1 ${ticket.priority === 'urgente' && !finished ? 'bg-red-600' : 'bg-navy-900 dark:bg-brand-sky'}`} />
-        <div className="flex flex-col gap-4 p-5 sm:p-6 lg:flex-row lg:items-start lg:justify-between">
-          <div className="min-w-0">
-            <p className="tabular text-sm font-medium text-muted">Protocolo {ticketCode(ticket.ticket_number)}</p>
-            <h1 className="mt-1 text-xl font-semibold break-words sm:text-2xl">{ticket.title}</h1>
-            <div className="mt-3 flex flex-wrap items-center gap-3">
-              <StatusBadge status={ticket.status} />
-              <PriorityBadge priority={ticket.priority} />
-            </div>
+      {/* Cabeçalho do chamado, no formato de ticket com canhoto */}
+      <div className="print-area mb-6 overflow-hidden rounded-2xl border border-line bg-surface lg:ticket-cut-v lg:grid lg:grid-cols-[minmax(0,1fr)_18rem] lg:[--cut-x:calc(100%-18rem)]">
+        <div className="min-w-0 p-5 sm:p-7">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <StatusBadge status={ticket.status} />
+            <PriorityBadge priority={ticket.priority} />
           </div>
-          <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-3 lg:min-w-[26rem]">
-            {meta.map((m) => (
-              <div key={m.label}>
+          <h1 className="wide mt-3 text-[1.45rem] break-words sm:text-[1.8rem]">{ticket.title}</h1>
+          <dl className="mt-5 grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-3">
+            {meta.filter((m) => !m.label.startsWith('Tempo')).map((m) => (
+              <div key={m.label} className="min-w-0">
                 <dt className="text-xs text-muted">{m.label}</dt>
                 <dd className="tabular mt-0.5 text-ink">{m.value}</dd>
               </div>
             ))}
           </dl>
         </div>
-      </Card>
+        <div className={`relative flex flex-col justify-between gap-4 p-5 text-white sm:p-7 ${ticket.priority === 'urgente' && !finished ? 'bg-red-700' : 'bg-navy-900 dark:bg-[#12295c]'}`}>
+          <div>
+            <p className="text-xs text-sky-100/70">Protocolo</p>
+            <p className="tabular wide font-display text-[2.1rem] leading-none font-bold" translate="no">{ticketCode(ticket.ticket_number)}</p>
+          </div>
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <p className="text-xs text-sky-100/70">{finished ? 'Tempo até a solução' : 'Aberto há'}</p>
+              <p className="tabular font-display text-lg font-semibold">{elapsed(ticket.created_at, ticket.resolved_at ?? ticket.closed_at)}</p>
+            </div>
+            <div className="barcode h-9 w-20 text-white/40" aria-hidden />
+          </div>
+        </div>
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="min-w-0 space-y-6">
@@ -389,7 +398,7 @@ export function TicketDetail({ number, admin }: { number: number; admin: boolean
                     ))}
                   </ul>
                 )}
-                <p className="mt-1.5 text-xs text-muted">Ctrl + Enter envia. Anexos: PNG, JPG ou PDF até 10 MB.</p>
+                <p className="mt-1.5 text-xs text-muted">Ctrl + Enter envia. Anexos: PNG, JPG ou PDF até 10 MB.</p>
               </form>
             ) : (
               <div className="border-t border-line p-4">
@@ -466,7 +475,7 @@ export function TicketDetail({ number, admin }: { number: number; admin: boolean
                     value={solution}
                     onChange={(e) => setSolution(e.target.value)}
                     maxLength={5000}
-                    placeholder="O que foi feito para resolver o problema?"
+                    placeholder="Ex.: troquei a fonte do computador…"
                     hint={finished ? undefined : 'Ao registrar, o chamado passa para Resolvido.'}
                   />
                   <Button size="sm" variant="accent" className="mt-3 w-full" onClick={saveSolution} loading={savingField === 'solution'}>

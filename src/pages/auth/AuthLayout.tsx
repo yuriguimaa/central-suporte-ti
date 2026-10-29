@@ -12,15 +12,15 @@ export function AuthLayout({ title, subtitle, children, footer }: { title: strin
         <Link to="/" aria-label="Página inicial">
           <Logo light />
         </Link>
-        <div className="mt-auto max-w-sm">
-          <p className="font-display text-2xl leading-snug font-semibold">
+        <div className="mt-auto max-w-md">
+          <p className="wide font-display text-[2rem] leading-[1.08] font-bold">
             Cada chamado tem protocolo, histórico e conversa direta com o técnico.
           </p>
-          <p className="mt-3 text-sm text-sky-100/70">{brand.tagline}</p>
+          <p className="mt-4 text-sm text-sky-100/70">{brand.tagline}</p>
+          <div className="barcode mt-10 h-10 w-48 text-white/30" aria-hidden />
         </div>
-        {/* motivo de picote, ecoando a marca */}
-        <div className="pointer-events-none absolute top-1/3 -right-16 h-64 w-64 rounded-full border-2 border-dashed border-white/10" aria-hidden />
-        <div className="pointer-events-none absolute top-[38%] -right-6 h-40 w-40 rounded-full bg-brand-sky/20 blur-2xl" aria-hidden />
+        {/* borda picotada: o painel é o canhoto da página */}
+        <span className="perf-y absolute inset-y-0 right-0 text-white/20" aria-hidden />
       </aside>
 
       <main className="flex flex-col bg-bg px-4 py-6 sm:px-8">

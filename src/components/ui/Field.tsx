@@ -54,6 +54,9 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
           ref={ref}
           id={fid}
           type={isPassword && show ? 'text' : type}
+          name={rest.name ?? (rest.autoComplete && rest.autoComplete !== 'off' ? rest.autoComplete : undefined)}
+          spellCheck={type === 'email' || isPassword ? false : rest.spellCheck}
+          autoCapitalize={type === 'email' ? 'none' : rest.autoCapitalize}
           aria-invalid={!!error || undefined}
           aria-describedby={error ? `${fid}-err` : hint ? `${fid}-hint` : undefined}
           className={`${controlClass} h-11 ${isPassword ? 'pr-11' : ''} ${className}`}

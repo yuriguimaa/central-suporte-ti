@@ -1,15 +1,15 @@
 import {
-  Cable, ClipboardList, Cpu, CircleEllipsis, KeyRound, Mail, MessagesSquare, MonitorSmartphone, Package,
-  Printer, Search, Shapes, UserPlus, Wifi, type LucideIcon,
+  Cable, CircleEllipsis, Cpu, KeyRound, Mail, MonitorSmartphone, Package, Printer, Shapes, Wifi, type LucideIcon,
 } from 'lucide-react'
 import { ButtonLink } from '@/components/ui/Button'
 import { brand } from '@/config/brand'
 
-const steps: { icon: LucideIcon; title: string; text: string }[] = [
-  { icon: UserPlus, title: 'Crie sua conta', text: 'Cadastre-se com nome e e-mail. Leva menos de um minuto.' },
-  { icon: ClipboardList, title: 'Abra um chamado', text: 'Descreva o problema, escolha a categoria e anexe prints ou PDFs.' },
-  { icon: MessagesSquare, title: 'Aguarde o atendimento', text: 'O técnico recebe o chamado na hora e responde pela própria plataforma.' },
-  { icon: Search, title: 'Acompanhe a solução', text: 'Veja o status, converse com o suporte e consulte o histórico completo.' },
+// As etapas seguem o próprio ciclo de vida do chamado, com as cores de status do sistema.
+const steps = [
+  { title: 'Crie sua conta', text: 'Nome, e-mail e senha. Leva menos de um minuto.', dot: 'bg-slate-400' },
+  { title: 'Abra um chamado', text: 'Descreva o problema, escolha a categoria e anexe prints ou PDFs.', dot: 'bg-blue-600' },
+  { title: 'Aguarde o atendimento', text: 'O técnico recebe na hora e responde pela própria plataforma.', dot: 'bg-amber-400' },
+  { title: 'Acompanhe a solução', text: 'Status, conversa e histórico completo em um só lugar.', dot: 'bg-emerald-500' },
 ]
 
 const areas: { icon: LucideIcon; label: string }[] = [
@@ -25,59 +25,37 @@ const areas: { icon: LucideIcon; label: string }[] = [
   { icon: CircleEllipsis, label: 'Outros' },
 ]
 
-/** O elemento de destaque da página: um chamado real, com picote e trilha de status. */
-function TicketStub() {
-  const track = [
-    { label: 'Aberto', time: '09:12' },
-    { label: 'Em andamento', time: '09:20' },
-    { label: 'Resolvido', time: '10:05' },
-  ]
+const track = [
+  { label: 'Aberto', time: '09:12' },
+  { label: 'Em andamento', time: '09:20' },
+  { label: 'Resolvido', time: '10:05' },
+]
+
+/** Canhoto do chamado: protocolo, trilha de status e código de barras. */
+function Stub() {
   return (
-    <div className="relative mx-auto w-full max-w-md select-none" aria-hidden>
-      <div className="absolute -inset-6 -z-10 rounded-[2rem] bg-sky-wash dark:bg-navy-800/40" />
-      <div className="relative overflow-hidden rounded-2xl bg-navy-900 text-white shadow-[0_24px_60px_-20px_rgba(11,37,69,0.55)]">
-        <div className="flex flex-wrap items-start justify-between gap-2 px-6 pt-6">
-          <div>
-            <p className="text-xs text-sky-200/80">Protocolo</p>
-            <p className="tabular font-display text-3xl font-semibold tracking-tight">#000125</p>
-          </div>
-          <span className="rounded-full bg-white/10 px-2.5 py-1 text-xs text-sky-100">Computadores e notebooks</span>
-        </div>
-        <p className="px-6 pt-4 pr-32 font-display text-lg">Computador não liga</p>
-        <p className="px-6 pt-1 text-sm text-sky-100/75">
-          Desde hoje cedo o PC da recepção não dá sinal. A luz do botão pisca e apaga.
-        </p>
+    <div className="relative flex flex-col p-7 sm:p-9 lg:pl-10" aria-hidden>
+      <p className="text-sm text-sky-100/70">Protocolo</p>
+      <p className="tabular wide font-display text-[2.6rem] leading-none font-bold text-white">#000125</p>
+      <p className="mt-3 text-sm text-sky-100/80">Computador não liga</p>
 
-        {/* picote */}
-        <div className="relative my-6 flex items-center">
-          <span className="absolute -left-3 size-6 rounded-full bg-sky-wash dark:bg-[#0d2442]" />
-          <span className="mx-5 h-px flex-1 border-t-2 border-dashed border-white/20" />
-          <span className="absolute -right-3 size-6 rounded-full bg-sky-wash dark:bg-[#0d2442]" />
-        </div>
+      <ol className="mt-7 space-y-3.5">
+        {track.map((t, i) => (
+          <li
+            key={t.label}
+            className="flex items-center gap-3 text-sm"
+            style={{ animation: `fade-in .35s ease-out ${0.5 + i * 0.45}s both` }}
+          >
+            <span className={`size-2.5 rounded-[2px] ${i === 2 ? 'bg-emerald-400' : 'bg-brand-sky-light'}`} />
+            <span className="flex-1 text-white">{t.label}</span>
+            <span className="tabular text-sky-100/60">{t.time}</span>
+          </li>
+        ))}
+      </ol>
 
-        <div className="px-6 pb-6">
-          <div className="relative mb-3 h-1 rounded-full bg-white/10">
-            <div
-              className="absolute inset-y-0 left-0 w-full origin-left rounded-full bg-brand-sky-light"
-              style={{ animation: 'track-fill 1.6s cubic-bezier(.6,.05,.3,1) .4s both' }}
-            />
-          </div>
-          <ol className="grid grid-cols-3 text-xs">
-            {track.map((t, i) => (
-              <li key={t.label} className={i === 1 ? 'text-center' : i === 2 ? 'text-right' : ''}>
-                <span className="block font-medium text-white">{t.label}</span>
-                <span className="tabular text-sky-100/60">{t.time}</span>
-              </li>
-            ))}
-          </ol>
-        </div>
-
-        <span
-          className="absolute top-[6.4rem] right-6 rounded-md border-2 border-emerald-300 px-2 py-0.5 font-display text-sm font-semibold text-emerald-300"
-          style={{ animation: 'stamp .5s ease-out 2s both' }}
-        >
-          Resolvido
-        </span>
+      <div className="mt-auto pt-10">
+        <div className="barcode h-14 text-white/85" />
+        <p className="tabular mt-2 text-xs tracking-[0.3em] text-sky-100/50">0 000125 291026</p>
       </div>
     </div>
   )
@@ -86,66 +64,73 @@ function TicketStub() {
 export default function Landing() {
   return (
     <>
-      <section className="overflow-hidden">
-        <div className="mx-auto grid max-w-6xl items-center gap-14 px-4 pt-14 pb-20 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:pt-20 lg:pb-28">
-          <div>
-            <h1 className="max-w-xl text-[2.25rem] font-semibold leading-[1.08] text-navy-900 sm:text-5xl dark:text-white">
-              Bem-vindo à {brand.name}
-            </h1>
-            <p className="mt-5 max-w-lg text-lg text-muted">
-              Precisa de ajuda com seu computador, sistema ou equipamento? Abra um chamado e acompanhe seu atendimento de
-              forma simples e rápida.
-            </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <ButtonLink to="/painel/novo" size="lg">
-                Abrir chamado
-              </ButtonLink>
-              <ButtonLink to="/painel/chamados" size="lg" variant="secondary">
-                Acompanhar meus chamados
-              </ButtonLink>
+      <section className="bg-bg-app px-4 py-10 sm:px-6 sm:py-14 lg:py-20">
+        <div className="mx-auto max-w-6xl">
+          <div className="overflow-hidden rounded-[28px] bg-navy-900 text-white shadow-[0_30px_80px_-30px_rgba(10,36,99,0.6)] lg:ticket-cut-v lg:grid lg:grid-cols-[68%_32%]">
+            <div className="relative p-7 sm:p-10 lg:p-14">
+              <h1 className="wide max-w-2xl text-[2.35rem] leading-[1.02] font-bold text-white sm:text-[3.4rem] lg:text-[4rem]">
+                Bem-vindo à {brand.name}
+              </h1>
+              <p className="mt-6 max-w-xl text-lg leading-relaxed text-sky-100/85">
+                Precisa de ajuda com seu computador, sistema ou equipamento? Abra um chamado e acompanhe seu atendimento
+                de forma simples e rápida.
+              </p>
+              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+                <ButtonLink
+                  to="/painel/novo"
+                  size="lg"
+                  variant="onDark"
+                >
+                  Abrir chamado
+                </ButtonLink>
+                <ButtonLink
+                  to="/painel/chamados"
+                  size="lg"
+                  variant="onDarkOutline"
+                >
+                  Acompanhar meus chamados
+                </ButtonLink>
+              </div>
             </div>
-            <p className="mt-5 text-sm text-muted">Você recebe um número de protocolo assim que o chamado é aberto.</p>
+            <div className="relative">
+              <span className="perf-x absolute inset-x-7 top-0 text-white/25 lg:hidden" aria-hidden />
+              <span className="perf-y absolute inset-y-8 left-0 hidden text-white/25 lg:block" aria-hidden />
+              <Stub />
+            </div>
           </div>
-          <TicketStub />
+          <p className="mt-5 text-center text-sm text-muted">
+            Todo chamado recebe um número de protocolo na hora em que é aberto.
+          </p>
         </div>
       </section>
 
-      <section className="border-y border-line bg-surface-2">
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
-          <h2 className="text-2xl font-semibold sm:text-3xl">Como funciona</h2>
-          <p className="mt-2 max-w-xl text-muted">Do primeiro contato até a solução, tudo fica registrado no seu chamado.</p>
-          <ol className="mt-10 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
-            {steps.map((s, i) => (
-              <li key={s.title} className="relative">
-                <div className="flex items-center gap-3">
-                  <span className="tabular flex size-9 items-center justify-center rounded-full bg-navy-900 font-display text-sm font-semibold text-white dark:bg-brand-sky">
-                    {i + 1}
-                  </span>
-                  {i < steps.length - 1 && <span className="hidden h-px flex-1 bg-line lg:block" aria-hidden />}
-                </div>
-                <h3 className="mt-4 flex items-center gap-2 text-base font-semibold">
-                  <s.icon className="size-4 text-brand-sky" aria-hidden />
-                  {s.title}
-                </h3>
-                <p className="mt-1.5 text-sm text-muted">{s.text}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
+      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
+        <h2 className="wide text-2xl sm:text-3xl">Como funciona</h2>
+        <ol className="relative mt-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+          <span className="perf-x absolute top-[7px] right-0 left-0 hidden text-line lg:block" aria-hidden />
+          {steps.map((s, i) => (
+            <li key={s.title} className="relative">
+              <span className={`relative block size-4 rounded-[4px] ring-4 ring-bg ${s.dot}`} aria-hidden />
+              <p className="tabular mt-5 font-display text-sm text-muted">Etapa {i + 1}</p>
+              <h3 className="mt-1 text-lg">{s.title}</h3>
+              <p className="mt-2 max-w-[16rem] text-sm text-muted">{s.text}</p>
+            </li>
+          ))}
+        </ol>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
-        <div className="grid gap-10 lg:grid-cols-[1fr_2fr]">
+      <section className="border-t border-line">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1fr_2fr] lg:py-24">
           <div>
-            <h2 className="text-2xl font-semibold sm:text-3xl">O que atendemos</h2>
-            <p className="mt-2 text-muted">
+            <h2 className="wide text-2xl sm:text-3xl">O que atendemos</h2>
+            <p className="mt-3 max-w-sm text-muted">
               Escolha a categoria ao abrir o chamado para que ele chegue ao técnico já organizado.
             </p>
           </div>
-          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <ul className="grid gap-x-8 sm:grid-cols-2">
             {areas.map((a) => (
-              <li key={a.label} className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3 text-sm">
-                <a.icon className="size-[18px] shrink-0 text-navy-700 dark:text-brand-sky-light" aria-hidden />
+              <li key={a.label} className="flex items-center gap-3 border-b border-dashed border-line py-3.5 text-[15px]">
+                <a.icon className="size-[18px] shrink-0 text-navy-700 dark:text-primary" aria-hidden />
                 {a.label}
               </li>
             ))}
@@ -153,13 +138,13 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="bg-navy-900 dark:bg-navy-950">
-        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-4 py-14 sm:px-6 md:flex-row md:items-center">
+      <section className="bg-brand-sky-light dark:bg-[#12295c]">
+        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-4 py-12 sm:px-6 md:flex-row md:items-center">
           <div>
-            <h2 className="text-2xl font-semibold text-white">Algo parou de funcionar?</h2>
-            <p className="mt-1 text-sky-100/80">Registre agora e acompanhe cada etapa do atendimento.</p>
+            <h2 className="wide text-2xl text-navy-950 dark:text-white">Algo parou de funcionar?</h2>
+            <p className="mt-1 text-navy-900/80 dark:text-sky-100/80">Registre agora e acompanhe cada etapa do atendimento.</p>
           </div>
-          <ButtonLink to="/cadastro" size="lg" variant="accent">
+          <ButtonLink to="/cadastro" size="lg">
             Criar conta
           </ButtonLink>
         </div>

@@ -6,47 +6,53 @@
    Tokens da identidade visual. Para mudar as cores da marca, altere aqui.
    ------------------------------------------------------------------------- */
 :root {
-  --navy-950: #071a30;
-  --navy-900: #0b2545;
-  --navy-800: #123459;
-  --navy-700: #1a4775;
-  --sky: #2f9be0;
-  --sky-light: #7cc8f8;
-  --sky-wash: #e6f3fc;
+  /* Paleta: azul-escuro (cobalto profundo), azul-claro (etiqueta) e branco */
+  --navy-950: #05173a;
+  --navy-900: #0a2463;
+  --navy-800: #11317c;
+  --navy-700: #1d4aa8;
+  --sky: #2f86eb;
+  --sky-light: #8ecbff;
+  --sky-wash: #e4f1ff;
+  --tag-bg: #8ecbff;
+  --tag-fg: #061b4d;
 
   --bg: #ffffff;
-  --bg-app: #eef2f6;
+  --bg-app: #e9edf2;
   --surface: #ffffff;
-  --surface-2: #f6f8fb;
-  --border: #dde4ec;
-  --text: #0e1c2c;
-  --muted: #5b6b7d;
+  --surface-2: #f3f6fa;
+  --border: #d6dde7;
+  --text: #0a1630;
+  --muted: #52607a;
   --primary: var(--navy-900);
   --primary-hover: var(--navy-800);
   --primary-fg: #ffffff;
   --accent: var(--sky);
-  --ring: #2f9be0;
+  --ring: #2f86eb;
+  color-scheme: light;
 }
 
 .dark {
-  --bg: #061426;
-  --bg-app: #061426;
-  --surface: #0c2039;
-  --surface-2: #10294a;
-  --border: #1d3a5e;
-  --text: #e7eef7;
-  --muted: #93a6bd;
-  --primary: #4aaef0;
-  --primary-hover: #7cc8f8;
-  --primary-fg: #061426;
-  --accent: #7cc8f8;
-  --sky-wash: #0f2c4d;
+  --bg: #050f24;
+  --bg-app: #050f24;
+  --surface: #0b1a3a;
+  --surface-2: #10234c;
+  --border: #1e3466;
+  --text: #e6eefb;
+  --muted: #95a6c4;
+  --primary: #8ecbff;
+  --primary-hover: #b7ddff;
+  --primary-fg: #05173a;
+  --accent: #8ecbff;
+  --sky-wash: #12295c;
+  --tag-bg: #1f3f85;
+  --tag-fg: #d4eaff;
   color-scheme: dark;
 }
 
 @theme inline {
-  --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Sora', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Archivo', ui-sans-serif, system-ui, sans-serif;
 
   --color-navy-950: var(--navy-950);
   --color-navy-900: var(--navy-900);
@@ -72,6 +78,8 @@
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
   body {
     @apply bg-bg font-sans text-ink antialiased;
@@ -80,8 +88,15 @@
   }
   h1, h2, h3, h4 {
     @apply font-display text-ink;
-    letter-spacing: -0.015em;
-    line-height: 1.2;
+    font-stretch: 116%;
+    font-weight: 650;
+    letter-spacing: -0.012em;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+  select {
+    background-color: var(--surface);
+    color: var(--text);
   }
   :focus-visible {
     outline: 2px solid var(--ring);
@@ -99,6 +114,73 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* -------------------------------------------------------------------------
+   Linguagem visual: o "ticket". Picote, recortes laterais e etiqueta de
+   protocolo aparecem nos pontos em que o chamado é o assunto.
+   ------------------------------------------------------------------------- */
+@layer components {
+  /* Texto em largura expandida, como etiquetas de patrimônio */
+  .font-display { font-stretch: 116%; }
+  .wide { font-stretch: 125%; }
+
+  /* Recortes semicirculares nas laterais (meio da altura) */
+
+
+  /* Recortes no topo e na base, na posição do picote vertical (canhoto à direita) */
+
+
+  /* Linha de picote */
+  .perf-x { background: repeating-linear-gradient(90deg, currentColor 0 6px, transparent 6px 11px); height: 2px; }
+  .perf-y { background: repeating-linear-gradient(180deg, currentColor 0 6px, transparent 6px 11px); width: 2px; }
+
+  /* Etiqueta de protocolo: fundo azul-claro com recorte à esquerda */
+  .proto-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.1rem 0.5rem 0.1rem 0.7rem;
+    border-radius: 4px;
+    background: var(--tag-bg);
+    color: var(--tag-fg);
+    font-family: var(--font-display);
+    font-stretch: 112%;
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    -webkit-mask: radial-gradient(circle 4px at 0 50%, #0000 97%, #000);
+    mask: radial-gradient(circle 4px at 0 50%, #0000 97%, #000);
+  }
+
+  /* Código de barras decorativo do canhoto */
+  .barcode {
+    background: repeating-linear-gradient(90deg,
+      currentColor 0 2px, transparent 2px 4px, currentColor 4px 5px, transparent 5px 8px,
+      currentColor 8px 11px, transparent 11px 12px, currentColor 12px 13px, transparent 13px 16px);
+  }
+}
+
+@utility ticket-cut-v {
+  --cut: 14px;
+  --cut-x: 68%;
+  -webkit-mask:
+    radial-gradient(circle var(--cut) at var(--cut-x) 0, #0000 98%, #000) top / 100% 51% no-repeat,
+    radial-gradient(circle var(--cut) at var(--cut-x) 100%, #0000 98%, #000) bottom / 100% 51% no-repeat;
+  mask:
+    radial-gradient(circle var(--cut) at var(--cut-x) 0, #0000 98%, #000) top / 100% 51% no-repeat,
+    radial-gradient(circle var(--cut) at var(--cut-x) 100%, #0000 98%, #000) bottom / 100% 51% no-repeat;
+}
+@utility ticket-cut {
+  --cut: 12px;
+  --cut-y: 50%;
+  -webkit-mask:
+    radial-gradient(circle var(--cut) at 0 var(--cut-y), #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle var(--cut) at 100% var(--cut-y), #0000 98%, #000) right / 51% 100% no-repeat;
+  mask:
+    radial-gradient(circle var(--cut) at 0 var(--cut-y), #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle var(--cut) at 100% var(--cut-y), #0000 98%, #000) right / 51% 100% no-repeat;
+}
+dialog { overscroll-behavior: contain; }
 
 /* Animações discretas */
 @keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }

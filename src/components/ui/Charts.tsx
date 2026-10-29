@@ -60,7 +60,7 @@ export function ColumnChart({ data, height = 180 }: { data: { key: string; label
             {data.map((d, i) => (
               <li
                 key={d.key}
-                className="relative flex h-full flex-1 flex-col items-center justify-end outline-none"
+                className="relative flex h-full flex-1 flex-col items-center justify-end rounded-sm"
                 tabIndex={0}
                 onMouseEnter={() => setHover(i)}
                 onMouseLeave={() => setHover(null)}

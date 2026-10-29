@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { CheckCircle2, CircleDot, Hourglass, Lock, MessageCircleQuestion, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { PageHeader } from '@/components/layout/AppShell'
 import { ButtonLink } from '@/components/ui/Button'
 import { Card, CardHeader } from '@/components/ui/Card'
-import { StatCard } from '@/components/ui/StatCard'
+import { StatStrip } from '@/components/ui/StatStrip'
+import { STATUS, STATUS_ORDER } from '@/lib/constants'
 import { Alert } from '@/components/ui/Feedback'
 import { TicketTable } from '@/components/tickets/TicketTable'
 import { fetchTickets } from '@/lib/tickets'
@@ -60,13 +61,14 @@ export default function UserDashboard() {
           </Alert>
         </div>
       )}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
-        <StatCard label="Abertos" value={counts?.aberto ?? null} icon={CircleDot} to="/painel/chamados?status=aberto" tone="bg-sky-50 text-sky-700 dark:bg-sky-500/10 dark:text-sky-300" />
-        <StatCard label="Em andamento" value={counts?.em_andamento ?? null} icon={Hourglass} to="/painel/chamados?status=em_andamento" tone="bg-amber-50 text-amber-700 dark:bg-amber-400/10 dark:text-amber-300" />
-        <StatCard label="Aguardando resposta" value={counts?.aguardando_usuario ?? null} icon={MessageCircleQuestion} to="/painel/chamados?status=aguardando_usuario" tone="bg-orange-50 text-orange-700 dark:bg-orange-500/10 dark:text-orange-300" />
-        <StatCard label="Resolvidos" value={counts?.resolvido ?? null} icon={CheckCircle2} to="/painel/chamados?status=resolvido" tone="bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300" />
-        <StatCard label="Encerrados" value={counts?.encerrado ?? null} icon={Lock} to="/painel/chamados?status=encerrado" tone="bg-slate-100 text-slate-700 dark:bg-slate-400/10 dark:text-slate-300" />
-      </div>
+      <StatStrip
+        items={STATUS_ORDER.map((st) => ({
+          label: st === 'aguardando_usuario' ? 'Aguardando você' : STATUS[st].label,
+          value: counts ? counts[st] : null,
+          dot: STATUS[st].dot,
+          to: `/painel/chamados?status=${st}`,
+        }))}
+      />
 
       <Card className="mt-6 overflow-hidden">
         <CardHeader
