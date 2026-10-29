@@ -10,7 +10,7 @@ import { Card, CardHeader } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Field'
 
 export default function ProfilePage() {
-  const { profile, refreshProfile } = useAuth()
+  const { profile, refreshProfile, isAdmin } = useAuth()
   const toast = useToast()
   const [name, setName] = useState(profile?.full_name ?? '')
   const [phone, setPhone] = useState(profile?.phone ?? '')
@@ -25,7 +25,7 @@ export default function ProfilePage() {
   const saveProfile = async (e: FormEvent) => {
     e.preventDefault()
     const next: typeof errors = {}
-    if (name.trim().length < 3) next.name = 'Informe seu nome completo.'
+    if (isAdmin && name.trim().length < 3) next.name = 'Informe seu nome completo.'
     const pe = validatePhone(phone)
     if (pe) next.phone = pe
     setErrors(next)
@@ -33,7 +33,8 @@ export default function ProfilePage() {
     setSaving(true)
     const { error } = await supabase
       .from('profiles')
-      .update({ full_name: name.trim().replace(/\s+/g, ' '), phone: phone || null })
+      // O nome é definido no cadastro; só o administrador pode alterá-lo.
+      .update(isAdmin ? { full_name: name.trim().replace(/\s+/g, ' '), phone: phone || null } : { phone: phone || null })
       .eq('id', profile.id)
     setSaving(false)
     if (error) return toast('error', friendlyError(error))
@@ -67,7 +68,11 @@ export default function ProfilePage() {
         <Card>
           <CardHeader title="Dados pessoais" />
           <form onSubmit={saveProfile} noValidate className="space-y-4 p-5">
-            <Input label="Nome completo" value={name} onChange={(e) => setName(e.target.value)} error={errors.name} maxLength={120} />
+            {isAdmin ? (
+              <Input label="Nome completo" value={name} onChange={(e) => setName(e.target.value)} error={errors.name} maxLength={120} />
+            ) : (
+              <Input label="Nome completo" value={profile.full_name} disabled hint="Para corrigir o nome, fale com o suporte." />
+            )}
             <Input label="E-mail" value={profile.email} disabled hint="Para trocar o e-mail, fale com o suporte." />
             <Input label="Telefone" optional type="tel" value={phone} onChange={(e) => setPhone(maskPhone(e.target.value))} error={errors.phone} />
             <Button type="submit" loading={saving}>Salvar dados</Button>

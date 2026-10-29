@@ -230,7 +230,7 @@ create trigger on_auth_user_email_changed
   for each row when (old.email is distinct from new.email)
   execute function public.handle_user_email_change();
 
--- 5.2 Proteção do perfil: papel só muda pelo SQL Editor; is_active só por admin.
+-- 5.2 Proteção do perfil: papel só muda pelo SQL Editor; is_active e nome só por admin.
 create or replace function public.protect_profile()
 returns trigger language plpgsql security definer set search_path = public as $$
 begin
@@ -240,6 +240,9 @@ begin
     end if;
     if new.is_active is distinct from old.is_active and not public.is_admin() then
       raise exception 'Somente administradores podem ativar ou desativar contas.';
+    end if;
+    if new.full_name is distinct from old.full_name and not public.is_admin() then
+      raise exception 'O nome só pode ser alterado pelo suporte.';
     end if;
     if new.id = auth.uid() and new.is_active = false then
       raise exception 'Você não pode desativar a própria conta.';
