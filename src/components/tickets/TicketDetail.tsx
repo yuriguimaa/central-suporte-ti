@@ -50,7 +50,7 @@ export function TicketDetail({ number, admin }: { number: number; admin: boolean
   const [savingField, setSavingField] = useState<string | null>(null)
   const [pending, setPending] = useState<PendingChange | null>(null)
 
-  const chatEnd = useRef<HTMLDivElement>(null)
+  const chatBox = useRef<HTMLDivElement>(null)
 
   const load = useCallback(async () => {
     const { data: t, error } = await supabase.from('tickets').select('*').eq('ticket_number', number).maybeSingle()
@@ -112,7 +112,9 @@ export function TicketDetail({ number, admin }: { number: number; admin: boolean
   }, [ticket?.id, admin])
 
   useEffect(() => {
-    chatEnd.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    // Rola somente a área da conversa (não a página inteira).
+    const box = chatBox.current
+    if (box) box.scrollTo({ top: box.scrollHeight, behavior: 'smooth' })
   }, [messages.length])
 
   const byMessage = useMemo(() => {
@@ -282,7 +284,7 @@ export function TicketDetail({ number, admin }: { number: number; admin: boolean
               title="Conversa com o suporte"
               description={admin ? 'Notas internas ficam visíveis somente para administradores.' : 'Responda perguntas do técnico e envie prints por aqui.'}
             />
-            <div className="max-h-[36rem] space-y-4 overflow-y-auto bg-surface-2/60 px-4 py-5 sm:px-5" aria-live="polite">
+            <div ref={chatBox} className="max-h-[36rem] space-y-4 overflow-y-auto bg-surface-2/60 px-4 py-5 sm:px-5" aria-live="polite">
               {messages.length === 0 ? (
                 <EmptyState icon={MessageSquare} title="Nenhuma mensagem ainda" text={admin ? 'Envie a primeira resposta ao usuário.' : 'O técnico responderá por aqui.'} />
               ) : (
@@ -331,7 +333,6 @@ export function TicketDetail({ number, admin }: { number: number; admin: boolean
                   )
                 })
               )}
-              <div ref={chatEnd} />
             </div>
 
             {canWrite ? (

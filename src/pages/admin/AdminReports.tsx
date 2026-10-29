@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Download, FileBarChart } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/contexts/ToastContext'
-import { CATEGORY, CATEGORY_ORDER, PRIORITY, PRIORITY_ORDER, STATUS, STATUS_ORDER } from '@/lib/constants'
+import { CATEGORY, CATEGORY_ORDER, PRIORITY, PRIORITY_ORDER, PRIORITY_SHADE, STATUS, STATUS_ORDER } from '@/lib/constants'
 import { downloadCsv } from '@/lib/csv'
 import { elapsed, formatDateTime, ticketCode } from '@/lib/format'
 import { friendlyError } from '@/lib/validation'
@@ -14,7 +14,8 @@ import { Alert, EmptyState, Spinner } from '@/components/ui/Feedback'
 import { HBarList } from '@/components/ui/Charts'
 import type { TicketCategory, TicketStatus, TicketWithOwner } from '@/types/database'
 
-const iso = (d: Date) => d.toISOString().slice(0, 10)
+// Data local no formato AAAA-MM-DD (evita virar o dia por causa do fuso)
+const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 
 export default function AdminReports() {
   const toast = useToast()
@@ -76,7 +77,7 @@ export default function AdminReports() {
       avgH,
       byStatus: count(STATUS_ORDER, (r) => r.status).map((x) => ({ ...x, label: STATUS[x.key].label, color: STATUS[x.key].dot })),
       byCategory: count(CATEGORY_ORDER, (r) => r.category).map((x) => ({ ...x, label: CATEGORY[x.key] })).sort((a, b) => b.value - a.value),
-      byPriority: count(PRIORITY_ORDER, (r) => r.priority).map((x) => ({ ...x, label: PRIORITY[x.key].label })),
+      byPriority: count(PRIORITY_ORDER, (r) => r.priority).map((x) => ({ ...x, label: PRIORITY[x.key].label, color: PRIORITY_SHADE[x.key] })),
     }
   }, [rows])
 

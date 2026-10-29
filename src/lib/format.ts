@@ -38,7 +38,8 @@ export function elapsed(fromIso: string, toIso?: string | null) {
 export function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`
-  return `${(bytes / 1024 / 1024).toFixed(1)} MB`
+  const mb = bytes / 1024 / 1024
+  return `${Number.isInteger(mb) ? mb : mb.toFixed(1)} MB`
 }
 
 export function initials(name: string) {

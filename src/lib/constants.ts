@@ -17,6 +17,14 @@ export const PRIORITY: Record<TicketPriority, { label: string; badge: string; we
   urgente: { label: 'Urgente', badge: 'text-red-700 dark:text-red-300', weight: 4 },
 }
 
+// Tom único, do claro ao escuro, para gráficos (prioridade é ordinal)
+export const PRIORITY_SHADE: Record<TicketPriority, string> = {
+  baixa: 'bg-sky-200 dark:bg-sky-900',
+  media: 'bg-sky-400 dark:bg-sky-700',
+  alta: 'bg-sky-600 dark:bg-sky-500',
+  urgente: 'bg-navy-900 dark:bg-sky-300',
+}
+
 export const PRIORITY_ORDER: TicketPriority[] = ['baixa', 'media', 'alta', 'urgente']
 
 export const CATEGORY: Record<TicketCategory, string> = {

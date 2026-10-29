@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { CheckCircle2, CircleDot, Flame, Hourglass, Inbox, Lock, MessageCircleQuestion, Timer, Users } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import { CATEGORY, CATEGORY_ORDER, PRIORITY, PRIORITY_ORDER, STATUS, STATUS_ORDER } from '@/lib/constants'
+import { CATEGORY, CATEGORY_ORDER, PRIORITY, PRIORITY_ORDER, PRIORITY_SHADE, STATUS, STATUS_ORDER } from '@/lib/constants'
 import { fetchTickets } from '@/lib/tickets'
 import { ticketCode, timeAgo } from '@/lib/format'
 import { friendlyError } from '@/lib/validation'
@@ -19,8 +19,6 @@ import type { DashboardStats, TicketWithOwner } from '@/types/database'
 const monthShort = new Intl.DateTimeFormat('pt-BR', { month: 'short' })
 const monthLong = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' })
 
-// Sequência de um único tom (claro → escuro) para a prioridade, que é ordinal.
-const priorityShade = { baixa: 'bg-sky-200 dark:bg-sky-900', media: 'bg-sky-400 dark:bg-sky-700', alta: 'bg-sky-600 dark:bg-sky-500', urgente: 'bg-navy-900 dark:bg-sky-300' }
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
@@ -136,7 +134,7 @@ export default function AdminDashboard() {
             <Card>
               <CardHeader title="Chamados por prioridade" />
               <div className="p-5">
-                <HBarList data={PRIORITY_ORDER.map((p) => ({ key: p, label: PRIORITY[p].label, value: stats?.by_priority?.[p] ?? 0, color: priorityShade[p] }))} />
+                <HBarList data={PRIORITY_ORDER.map((p) => ({ key: p, label: PRIORITY[p].label, value: stats?.by_priority?.[p] ?? 0, color: PRIORITY_SHADE[p] }))} />
               </div>
             </Card>
             <Card>
