@@ -163,7 +163,7 @@ export default function NewTicket() {
           />
           <div>
             <p className="mb-1.5 flex items-baseline justify-between text-sm font-medium">
-              Anexos <span className="text-xs font-normal text-muted">opcional</span>
+              Print ou anexos <span className="text-xs font-normal text-muted">opcional</span>
             </p>
             <FilePicker files={files} onChange={setFiles} onError={(m) => toast('error', m)} disabled={saving} />
           </div>
