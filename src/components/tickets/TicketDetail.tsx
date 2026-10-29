@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
-  ArrowLeft, Clock, FileSearch, Lock, Mail, MessageSquare, Phone, Printer, RotateCcw, Send, ShieldCheck, StickyNote, User,
+  ArrowLeft, Clock, FileSearch, Lock, Mail, MessageSquare, Phone, Printer, RotateCcw, Send, ShieldCheck, StickyNote, Trash2, User,
 } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
+import { ATTACHMENTS_BUCKET, supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { useToast } from '@/contexts/ToastContext'
 import { CATEGORY, CATEGORY_ORDER, PRIORITY, PRIORITY_ORDER, STATUS, STATUS_ORDER } from '@/lib/constants'
@@ -55,6 +55,9 @@ export function TicketDetail({ number, admin }: { number: number; admin: boolean
   const [solution, setSolution] = useState('')
   const [savingField, setSavingField] = useState<string | null>(null)
   const [pending, setPending] = useState<PendingChange | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const navigate = useNavigate()
 
   const chatBox = useRef<HTMLDivElement>(null)
   const reopenBox = useRef<HTMLDivElement>(null)
@@ -152,6 +155,20 @@ export function TicketDetail({ number, admin }: { number: number; admin: boolean
   const finished = ticket.status === 'resolvido' || ticket.status === 'encerrado'
   // Resolvido ou encerrado: o usuário não escreve mais; se o problema voltar, reabre o chamado.
   const canWrite = admin || !finished
+
+  // Exclusão definitiva (somente admin): apaga o chamado no banco e depois os arquivos no Storage.
+  const deleteTicket = async () => {
+    setDeleting(true)
+    const { data: paths, error } = await supabase.rpc('admin_delete_ticket', { p_ticket_id: ticket.id })
+    if (error) {
+      setDeleting(false)
+      return toast('error', friendlyError(error))
+    }
+    const files = (paths as string[] | null) ?? []
+    if (files.length) await supabase.storage.from(ATTACHMENTS_BUCKET).remove(files)
+    toast('success', `Chamado ${ticketCode(ticket.ticket_number)} excluído.`)
+    navigate(backPath, { replace: true })
+  }
 
   const startReopen = () => {
     setReopening(true)
@@ -550,6 +567,12 @@ export function TicketDetail({ number, admin }: { number: number; admin: boolean
                     Registrar solução
                   </Button>
                 </div>
+
+                <div className="border-t border-line pt-4">
+                  <Button size="sm" variant="ghost" className="w-full text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10" icon={<Trash2 className="size-3.5" />} onClick={() => setConfirmDelete(true)}>
+                    Excluir chamado
+                  </Button>
+                </div>
               </div>
             </Card>
           )}
@@ -586,6 +609,17 @@ export function TicketDetail({ number, admin }: { number: number; admin: boolean
         onConfirm={() => pending && update({ status: pending.value }, 'status', `Status alterado para ${STATUS[pending.value].label}.`)}
       >
         {pending?.text}
+      </ConfirmDialog>
+      <ConfirmDialog
+        open={confirmDelete}
+        title={`Excluir o chamado ${ticketCode(ticket.ticket_number)}?`}
+        confirmLabel="Excluir definitivamente"
+        tone="danger"
+        loading={deleting}
+        onCancel={() => setConfirmDelete(false)}
+        onConfirm={deleteTicket}
+      >
+        A conversa, os anexos e o histórico serão apagados para sempre, inclusive para o usuário. Essa ação não pode ser desfeita.
       </ConfirmDialog>
     </div>
   )

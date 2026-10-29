@@ -718,7 +718,28 @@ begin
 end;
 $$;
 
--- 8.5 Promover uma conta a administrador.
+-- 8.5 Excluir chamado definitivamente (somente administradores).
+-- Mensagens, anexos, histórico e notificações caem junto (on delete cascade).
+-- Devolve os caminhos dos arquivos para o app apagá-los do Storage.
+create or replace function public.admin_delete_ticket(p_ticket_id uuid)
+returns text[] language plpgsql security definer set search_path = public as $$
+declare
+  v_paths text[];
+begin
+  if not public.is_admin() then
+    raise exception 'Acesso negado.';
+  end if;
+  select coalesce(array_agg(storage_path), '{}') into v_paths
+  from public.ticket_attachments where ticket_id = p_ticket_id;
+  delete from public.tickets where id = p_ticket_id;
+  if not found then
+    raise exception 'Chamado não encontrado.';
+  end if;
+  return v_paths;
+end;
+$$;
+
+-- 8.6 Promover uma conta a administrador.
 -- SEGURO: só pode ser executada no SQL Editor do Supabase (papel postgres).
 -- Não é acessível pela API nem por usuários logados.
 create or replace function public.promote_to_admin(p_email text)
@@ -760,6 +781,7 @@ grant execute on function public.admin_set_user_active(uuid, boolean)   to authe
 grant execute on function public.admin_dashboard_stats()                to authenticated;
 grant execute on function public.mark_all_notifications_read()          to authenticated;
 grant execute on function public.reopen_ticket(uuid, text)             to authenticated;
+grant execute on function public.admin_delete_ticket(uuid)             to authenticated;
 revoke execute on function public.promote_to_admin(text) from authenticated;
 -- Funções de trigger não devem ser chamadas pela API (/rest/v1/rpc).
 revoke execute on function public.handle_new_user()          from authenticated;
