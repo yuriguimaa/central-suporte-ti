@@ -275,7 +275,7 @@ create trigger tickets_before_insert
 
 -- 5.4 Chamado: datas automáticas na atualização.
 create or replace function public.ticket_before_update()
-returns trigger language plpgsql as $$
+returns trigger language plpgsql set search_path = public as $$
 begin
   new.updated_at := now();
   if new.status is distinct from old.status then
