@@ -18,7 +18,7 @@ export function SecretButton() {
     <button
       type="button"
       onClick={play}
-      className={`rounded-md border border-red-400/60 bg-red-600 px-2 py-0.5 font-display text-[10px] font-bold tracking-wider text-white shadow-[0_2px_0_#7f1d1d] transition-transform hover:bg-red-500 active:translate-y-0.5 active:shadow-none ${
+      className={`rounded border border-red-400/60 bg-red-600 px-1.5 py-px font-display text-[8px] leading-tight font-bold tracking-wide text-white shadow-[0_1px_0_#7f1d1d] transition-transform hover:bg-red-500 active:translate-y-0.5 active:shadow-none ${
         playing ? 'animate-pulse' : ''
       }`}
       title="Sério, não aperte."
