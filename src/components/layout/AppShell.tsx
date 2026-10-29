@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { LogOut, Menu, X, type LucideIcon } from 'lucide-react'
+import { SecretButton } from '@/components/ui/SecretButton'
 import { useAuth } from '@/contexts/AuthContext'
 import { Logo } from '@/components/ui/Logo'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
@@ -99,6 +100,9 @@ export function AppShell({ nav, home, areaLabel }: { nav: NavGroup[]; home: stri
           <LogOut className="size-[18px] text-slate-400" aria-hidden />
           Sair
         </button>
+        <div className="mt-2 flex justify-center">
+          <SecretButton />
+        </div>
       </div>
     </div>
   )
