@@ -141,6 +141,10 @@ create index if not exists ticket_attach_message_idx  on public.ticket_attachmen
 create index if not exists ticket_history_ticket_idx  on public.ticket_history (ticket_id, created_at);
 create index if not exists notifications_user_idx     on public.notifications (user_id, is_read, created_at desc);
 create index if not exists profiles_role_idx          on public.profiles (role);
+create index if not exists notifications_ticket_idx   on public.notifications (ticket_id);
+create index if not exists ticket_attach_uploader_idx on public.ticket_attachments (uploaded_by);
+create index if not exists ticket_history_changed_idx on public.ticket_history (changed_by);
+create index if not exists ticket_messages_sender_idx on public.ticket_messages (sender_id);
 
 -- -----------------------------------------------------------------------------
 -- 4. Funções auxiliares (SECURITY DEFINER com search_path fixo)
@@ -164,7 +168,7 @@ returns boolean language sql stable security definer set search_path = public as
 $$;
 
 create or replace function public.status_label(s public.ticket_status)
-returns text language sql immutable as $$
+returns text language sql immutable set search_path = public as $$
   select case s
     when 'aberto' then 'Aberto'
     when 'em_andamento' then 'Em andamento'
@@ -175,7 +179,7 @@ returns text language sql immutable as $$
 $$;
 
 create or replace function public.ticket_code(n bigint)
-returns text language sql immutable as $$
+returns text language sql immutable set search_path = public as $$
   select '#' || lpad(n::text, 6, '0');
 $$;
 
@@ -727,6 +731,17 @@ grant execute on function public.admin_set_user_active(uuid, boolean)   to authe
 grant execute on function public.admin_dashboard_stats()                to authenticated;
 grant execute on function public.mark_all_notifications_read()          to authenticated;
 revoke execute on function public.promote_to_admin(text) from authenticated;
+-- Funções de trigger não devem ser chamadas pela API (/rest/v1/rpc).
+revoke execute on function public.handle_new_user()          from authenticated;
+revoke execute on function public.handle_user_email_change() from authenticated;
+revoke execute on function public.protect_profile()          from authenticated;
+revoke execute on function public.ticket_before_insert()     from authenticated;
+revoke execute on function public.ticket_before_update()     from authenticated;
+revoke execute on function public.ticket_after_insert()      from authenticated;
+revoke execute on function public.ticket_after_update()      from authenticated;
+revoke execute on function public.message_before_insert()    from authenticated;
+revoke execute on function public.message_after_insert()     from authenticated;
+revoke execute on function public.attachment_before_insert() from authenticated;
 revoke execute on function public.demote_admin(text)     from authenticated;
 
 -- -----------------------------------------------------------------------------
