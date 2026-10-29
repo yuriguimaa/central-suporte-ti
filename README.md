@@ -87,5 +87,5 @@ Comandos: `npm run dev` (desenvolvimento), `npm run build` (gera `dist/`), `npm 
 
 - **Nome:** `VITE_APP_NAME` e `VITE_APP_SHORT_NAME` nas variáveis de ambiente (ou `src/config/brand.ts`).
   Altere também o `<title>` em `index.html`.
-- **Logomarca:** `src/components/ui/Logo.tsx` e `public/favicon.svg`.
+- **Logomarca:** `public/logo-mark.png`, `public/favicon.png` e `public/apple-touch-icon.png` (exibidas por `src/components/ui/Logo.tsx`).
 - **Cores:** tokens no início de `src/index.css` (modo claro e escuro).
