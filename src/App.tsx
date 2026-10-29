@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import {
   BarChart3, CheckCircle2, CircleDot, FilePlus2, Hourglass, Inbox, LayoutDashboard, List, MessageCircleQuestion,
   Settings, UserRound, Users,
@@ -20,7 +20,6 @@ import Register from '@/pages/auth/Register'
 import ForgotPassword from '@/pages/auth/ForgotPassword'
 import ResetPassword from '@/pages/auth/ResetPassword'
 
-const UserDashboard = lazy(() => import('@/pages/user/UserDashboard'))
 const NewTicket = lazy(() => import('@/pages/user/NewTicket'))
 const MyTickets = lazy(() => import('@/pages/user/MyTickets'))
 const ProfilePage = lazy(() => import('@/pages/user/ProfilePage'))
@@ -35,9 +34,8 @@ const AdminSettings = lazy(() => import('@/pages/admin/AdminSettings'))
 const userNav: NavGroup[] = [
   {
     items: [
-      { to: '/painel', label: 'Dashboard', icon: LayoutDashboard, end: true },
-      { to: '/painel/novo', label: 'Abrir chamado', icon: FilePlus2 },
       { to: '/painel/chamados', label: 'Meus chamados', icon: List },
+      { to: '/painel/novo', label: 'Abrir chamado', icon: FilePlus2 },
       { to: '/painel/perfil', label: 'Meu perfil', icon: UserRound },
     ],
   },
@@ -97,8 +95,9 @@ export default function App() {
                 <Route path="/redefinir-senha" element={<ResetPassword />} />
 
                 <Route element={<ProtectedRoute role="user" />}>
-                  <Route path="/painel" element={<AppShell nav={userNav} home="/painel" areaLabel="Área do usuário" />}>
-                    <Route index element={page(<UserDashboard />)} />
+                  <Route path="/painel" element={<AppShell nav={userNav} home="/painel/chamados" areaLabel="Área do usuário" />}>
+                    {/* O dashboard é exclusivo do administrador; o usuário começa em "Meus chamados". */}
+                    <Route index element={<Navigate to="/painel/chamados" replace />} />
                     <Route path="novo" element={page(<NewTicket />)} />
                     <Route path="chamados" element={page(<MyTickets />)} />
                     <Route path="chamados/:number" element={page(<TicketPage />)} />
