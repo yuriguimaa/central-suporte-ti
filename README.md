@@ -5,7 +5,7 @@ Usuários se cadastram, abrem chamados com anexos e conversam com o técnico; o 
 gerencia todos os chamados, usuários, relatórios e configurações.
 
 **Stack:** React 18 + TypeScript, Vite, Tailwind CSS 4, Lucide React, React Router, Supabase
-(PostgreSQL, Auth, Storage, Realtime) e Cloudflare Pages.
+(PostgreSQL, Auth, Storage, Realtime) e Cloudflare (Workers com arquivos estáticos).
 
 ## Funcionalidades
 
@@ -43,7 +43,7 @@ O script `supabase/tests/01-security-tests.sql` contém os testes de permissão 
 
 ```
 central-suporte-ti/
-├── public/                 favicon, _redirects (SPA) e _headers (segurança) da Cloudflare
+├── public/                 favicon e _headers (segurança) da Cloudflare; rotas SPA em wrangler.jsonc
 ├── supabase/
 │   ├── schema.sql          estrutura completa do banco, RLS, Storage e Realtime
 │   ├── promote-admin.sql   cria o primeiro administrador

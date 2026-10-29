@@ -4,7 +4,7 @@ O domínio só deve ser considerado publicado depois que todas as etapas abaixo 
 
 ## Opção A: domínio já gerenciado pela Cloudflare (recomendado)
 
-1. Cloudflare › **Workers & Pages** › projeto `central-suporte` › **Custom domains** › **Set up a custom domain**.
+1. Cloudflare › **Workers & Pages** › projeto `central-suporte-ti` › **Custom domains** › **Set up a custom domain**.
 2. Digite `suporte.meudominio.com.br` › **Continue** › **Activate domain**.
 3. A Cloudflare cria sozinha o registro DNS `CNAME suporte › central-suporte.pages.dev` (com proxy laranja ligado)
    e emite o certificado SSL. Em poucos minutos o status muda para **Active**.
@@ -18,7 +18,7 @@ Escolha um dos caminhos:
   A propagação leva de minutos a 24 h. Depois siga a Opção A.
 - **Somente um subdomínio, mantendo o DNS atual**: no painel do seu provedor crie
   `CNAME` com nome `suporte` e valor `central-suporte.pages.dev`. Depois adicione o domínio em
-  **Custom domains** na Cloudflare Pages e aguarde a validação.
+  **Domains & Routes** na Cloudflare e aguarde a validação.
   (Para o domínio raiz, sem subdomínio, o DNS precisa estar na Cloudflare.)
 
 ## HTTPS e SSL
@@ -29,18 +29,18 @@ Na zona do domínio na Cloudflare:
 - **SSL/TLS › Edge Certificates**: ligue **Always Use HTTPS** e **Automatic HTTPS Rewrites**.
   Opcional: **HSTS** (só depois de confirmar que tudo funciona em HTTPS).
 
-O certificado do domínio personalizado do Pages é emitido e renovado automaticamente.
+O certificado do domínio personalizado é emitido e renovado automaticamente.
 
 ## Redirecionamentos
 
-- O `public/_redirects` já cuida das rotas internas do React Router.
+- O `wrangler.jsonc` já cuida das rotas internas do React Router.
 - Para que o endereço `*.pages.dev` redirecione para o domínio próprio, crie em
   **Rules › Redirect Rules** (na zona do domínio) ou mantenha os dois endereços ativos.
   Se quiser redirecionar `www.suporte…` ou o domínio raiz, use uma regra *Single Redirect* com status 301.
 
 ## Variáveis de produção
 
-Se mudar algo (por exemplo `VITE_APP_NAME`), altere em **Settings › Variables and Secrets** do projeto Pages e faça novo deploy.
+Se mudar algo (por exemplo `VITE_APP_NAME`), altere em **Settings › Build › Variables and secrets** do projeto e faça novo deploy.
 
 ## Supabase Auth com o novo domínio
 
