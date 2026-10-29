@@ -41,6 +41,12 @@ export function TicketHistoryList({ items }: { items: TicketHistory[] }) {
             </span>
             <div className="min-w-0 pt-0.5 text-sm">
               <p className="text-ink">{d.text}</p>
+              {/* Guarda o texto de cada solução registrada, mesmo depois de reabrir ou trocar a solução. */}
+              {h.action === 'solucao' && h.new_value && (
+                <p className="mt-1 rounded-lg border-l-2 border-emerald-400 bg-emerald-50 px-2.5 py-1.5 text-xs whitespace-pre-wrap text-emerald-900 dark:bg-emerald-500/10 dark:text-emerald-100">
+                  {h.new_value}
+                </p>
+              )}
               {h.changed_by_name && <p className="text-xs text-muted">por {h.changed_by_name}</p>}
             </div>
           </li>

@@ -79,7 +79,8 @@ export function TicketDetail({ number, admin }: { number: number; admin: boolean
         : Promise.resolve({ data: null }),
     ])
     setTicket(tk)
-    setSolution(tk.solution ?? '')
+    // Reaberto: a solução antiga fica no card "Solução anterior"; o campo começa vazio para a nova.
+    setSolution(tk.status === 'resolvido' || tk.status === 'encerrado' ? tk.solution ?? '' : '')
     setMessages((m.data as TicketMessage[]) ?? [])
     setAttachments((a.data as TicketAttachment[]) ?? [])
     setHistory((h.data as TicketHistory[]) ?? [])
@@ -322,7 +323,20 @@ export function TicketDetail({ number, admin }: { number: number; admin: boolean
             </div>
           </Card>
 
-          {ticket.solution && (
+          {ticket.solution && !finished && (
+            // Chamado reaberto: a solução anterior continua visível, marcada como "não resolveu".
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 dark:border-amber-500/30 dark:bg-amber-500/10">
+              <p className="flex items-center gap-2 font-display text-sm font-semibold text-amber-800 dark:text-amber-300">
+                <RotateCcw className="size-4" /> Solução anterior: o problema voltou
+              </p>
+              <p className="mt-2 whitespace-pre-wrap text-sm text-amber-900 dark:text-amber-100">{ticket.solution}</p>
+              <p className="mt-2 text-xs text-amber-800/80 dark:text-amber-300/80">
+                O chamado foi reaberto e está em atendimento novamente.
+              </p>
+            </div>
+          )}
+
+          {ticket.solution && finished && (
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 dark:border-emerald-500/30 dark:bg-emerald-500/10">
               <p className="flex items-center gap-2 font-display text-sm font-semibold text-emerald-800 dark:text-emerald-300">
                 <ShieldCheck className="size-4" /> Solução registrada
