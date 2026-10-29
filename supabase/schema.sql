@@ -545,7 +545,7 @@ create policy "mensagens: enviar" on public.ticket_messages
         and (select public.is_active_user())
         and exists (
           select 1 from public.tickets t
-          where t.id = ticket_id and t.user_id = (select auth.uid()) and t.status <> 'encerrado'
+          where t.id = ticket_id and t.user_id = (select auth.uid()) and t.status not in ('resolvido', 'encerrado')
         )
       )
     )
@@ -692,7 +692,33 @@ returns void language sql security definer set search_path = public as $$
   update public.notifications set is_read = true where user_id = auth.uid() and not is_read;
 $$;
 
--- 8.4 Promover uma conta a administrador.
+-- 8.4 Reabrir chamado resolvido (pelo próprio usuário), informando o motivo.
+-- Chamados resolvidos não aceitam mensagens do usuário; para voltar a conversar ele reabre.
+-- Chamados encerrados são definitivos: só o administrador reabre.
+create or replace function public.reopen_ticket(p_ticket_id uuid, p_message text)
+returns void language plpgsql security definer set search_path = public as $$
+declare
+  v_status public.ticket_status;
+  v_msg text := trim(coalesce(p_message, ''));
+begin
+  if not (public.owns_ticket(p_ticket_id) and public.is_active_user()) then
+    raise exception 'Chamado não encontrado.';
+  end if;
+  if char_length(v_msg) < 5 then
+    raise exception 'Conte em poucas palavras o que voltou a acontecer.';
+  end if;
+  select status into v_status from public.tickets where id = p_ticket_id for update;
+  if v_status <> 'resolvido' then
+    raise exception 'Só chamados resolvidos podem ser reabertos.';
+  end if;
+  -- Triggers registram o histórico ("reaberto") e notificam o suporte pela mensagem.
+  update public.tickets set status = 'aberto' where id = p_ticket_id;
+  insert into public.ticket_messages (ticket_id, sender_id, message)
+  values (p_ticket_id, auth.uid(), left('Reabri o chamado: ' || v_msg, 5000));
+end;
+$$;
+
+-- 8.5 Promover uma conta a administrador.
 -- SEGURO: só pode ser executada no SQL Editor do Supabase (papel postgres).
 -- Não é acessível pela API nem por usuários logados.
 create or replace function public.promote_to_admin(p_email text)
@@ -733,6 +759,7 @@ grant execute on function public.ticket_code(bigint)                    to authe
 grant execute on function public.admin_set_user_active(uuid, boolean)   to authenticated;
 grant execute on function public.admin_dashboard_stats()                to authenticated;
 grant execute on function public.mark_all_notifications_read()          to authenticated;
+grant execute on function public.reopen_ticket(uuid, text)             to authenticated;
 revoke execute on function public.promote_to_admin(text) from authenticated;
 -- Funções de trigger não devem ser chamadas pela API (/rest/v1/rpc).
 revoke execute on function public.handle_new_user()          from authenticated;

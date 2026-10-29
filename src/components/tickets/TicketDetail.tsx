@@ -45,12 +45,19 @@ export function TicketDetail({ number, admin }: { number: number; admin: boolean
   const [internal, setInternal] = useState(false)
   const [sending, setSending] = useState(false)
 
+  // reabertura pelo usuário
+  const [reopening, setReopening] = useState(false)
+  const [reopenText, setReopenText] = useState('')
+  const [reopenErr, setReopenErr] = useState<string>()
+  const [savingReopen, setSavingReopen] = useState(false)
+
   // admin
   const [solution, setSolution] = useState('')
   const [savingField, setSavingField] = useState<string | null>(null)
   const [pending, setPending] = useState<PendingChange | null>(null)
 
   const chatBox = useRef<HTMLDivElement>(null)
+  const reopenBox = useRef<HTMLDivElement>(null)
 
   const load = useCallback(async () => {
     const { data: t, error } = await supabase.from('tickets').select('*').eq('ticket_number', number).maybeSingle()
@@ -143,7 +150,27 @@ export function TicketDetail({ number, admin }: { number: number; admin: boolean
 
   const closed = ticket.status === 'encerrado'
   const finished = ticket.status === 'resolvido' || ticket.status === 'encerrado'
-  const canWrite = admin || !closed
+  // Resolvido ou encerrado: o usuário não escreve mais; se o problema voltar, reabre o chamado.
+  const canWrite = admin || !finished
+
+  const startReopen = () => {
+    setReopening(true)
+    setTimeout(() => reopenBox.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50)
+  }
+
+  const reopen = async (e: FormEvent) => {
+    e.preventDefault()
+    const msg = reopenText.trim()
+    if (msg.length < 5) return setReopenErr('Conte em poucas palavras o que voltou a acontecer.')
+    setSavingReopen(true)
+    const { error } = await supabase.rpc('reopen_ticket', { p_ticket_id: ticket.id, p_message: msg })
+    setSavingReopen(false)
+    if (error) return toast('error', friendlyError(error))
+    setReopening(false)
+    setReopenText('')
+    toast('success', 'Chamado reaberto. O suporte foi avisado.')
+    load()
+  }
 
   const send = async (e: FormEvent) => {
     e.preventDefault()
@@ -284,6 +311,14 @@ export function TicketDetail({ number, admin }: { number: number; admin: boolean
                 <ShieldCheck className="size-4" /> Solução registrada
               </p>
               <p className="mt-2 whitespace-pre-wrap text-sm text-emerald-900 dark:text-emerald-100">{ticket.solution}</p>
+              {!admin && ticket.status === 'resolvido' && !reopening && (
+                <div className="no-print mt-4 flex flex-col gap-3 border-t border-emerald-200 pt-4 sm:flex-row sm:items-center sm:justify-between dark:border-emerald-500/30">
+                  <p className="text-sm font-medium text-emerald-900 dark:text-emerald-100">Não resolveu ou o problema voltou?</p>
+                  <Button variant="accent" size="lg" icon={<RotateCcw className="size-5" />} onClick={startReopen} className="w-full sm:w-auto">
+                    Reabrir chamado
+                  </Button>
+                </div>
+              )}
             </div>
           )}
 
@@ -401,8 +436,41 @@ export function TicketDetail({ number, admin }: { number: number; admin: boolean
                 <p className="mt-1.5 text-xs text-muted">Ctrl + Enter envia. Anexos: PNG, JPG ou PDF até 10 MB.</p>
               </form>
             ) : (
-              <div className="border-t border-line p-4">
-                <Alert tone="info">Este chamado foi encerrado. Se o problema voltar, abra um novo chamado citando o protocolo {ticketCode(ticket.ticket_number)}.</Alert>
+              <div ref={reopenBox} className="no-print border-t border-line p-4">
+                {closed ? (
+                  <Alert tone="info">Este chamado foi encerrado. Se o problema voltar, abra um novo chamado citando o protocolo {ticketCode(ticket.ticket_number)}.</Alert>
+                ) : reopening ? (
+                  <form onSubmit={reopen} noValidate className="space-y-3 rounded-xl border-2 border-brand-sky bg-sky-wash p-4">
+                    <Textarea
+                      label="O que voltou a acontecer?"
+                      placeholder="Ex.: a impressora voltou a travar ao imprimir frente e verso."
+                      rows={3}
+                      value={reopenText}
+                      onChange={(e) => {
+                        setReopenText(e.target.value)
+                        setReopenErr(undefined)
+                      }}
+                      error={reopenErr}
+                      maxLength={4000}
+                      autoFocus
+                    />
+                    <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                      <Button variant="secondary" onClick={() => setReopening(false)} disabled={savingReopen}>Cancelar</Button>
+                      <Button type="submit" variant="accent" loading={savingReopen} icon={<RotateCcw className="size-4" />}>Reabrir chamado</Button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-emerald-300 bg-emerald-50 p-5 text-center sm:flex-row sm:text-left dark:border-emerald-500/30 dark:bg-emerald-500/10">
+                    <ShieldCheck className="size-8 shrink-0 text-emerald-600" aria-hidden />
+                    <div className="flex-1">
+                      <p className="font-semibold text-ink">Este chamado foi resolvido.</p>
+                      <p className="text-sm text-muted">O problema voltou? Reabra o chamado e o suporte é avisado na hora.</p>
+                    </div>
+                    <Button size="lg" variant="accent" icon={<RotateCcw className="size-5" />} onClick={startReopen} className="w-full sm:w-auto">
+                      Reabrir chamado
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </Card>
