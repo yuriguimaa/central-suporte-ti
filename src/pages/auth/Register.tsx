@@ -37,24 +37,31 @@ export default function Register() {
 
   const submit = async (ev: FormEvent<HTMLFormElement>) => {
     ev.preventDefault()
-    const form = ev.currentTarget
+    const formEl = ev.currentTarget
     const e = validate()
     setErrors(e)
     setFormError(null)
-    if (Object.keys(e).length) return focusFirstInvalid(form)
+    if (Object.keys(e).length) return focusFirstInvalid(formEl)
 
     setLoading(true)
     const email = form.email.trim().toLowerCase()
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password: form.password,
-      options: {
-        // O perfil é criado no banco por trigger, sempre com o papel "Usuário".
-        data: { full_name: form.name.trim().replace(/\s+/g, ' '), phone: form.phone || null },
-        emailRedirectTo: `${window.location.origin}/entrar?confirmado=1`,
-      },
-    })
-    setLoading(false)
+    let result: Awaited<ReturnType<typeof supabase.auth.signUp>>
+    try {
+      result = await supabase.auth.signUp({
+        email,
+        password: form.password,
+        options: {
+          // O perfil é criado no banco por trigger, sempre com o papel "Usuário".
+          data: { full_name: form.name.trim().replace(/\s+/g, ' '), phone: form.phone || null },
+          emailRedirectTo: `${window.location.origin}/entrar?confirmado=1`,
+        },
+      })
+    } catch (err) {
+      return setFormError(friendlyError(err as Error))
+    } finally {
+      setLoading(false)
+    }
+    const { data, error } = result
 
     if (error) return setFormError(friendlyError(error))
     // Com "Confirm email" ligado, o Supabase devolve um usuário sem identidades se o e-mail já existir.
