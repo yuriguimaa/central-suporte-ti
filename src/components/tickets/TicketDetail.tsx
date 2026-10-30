@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
-  ArrowLeft, Clock, FileSearch, Lock, Mail, MessageSquare, Phone, Printer, RotateCcw, Send, ShieldCheck, StickyNote, Trash2, User,
+  ArrowLeft, CheckCircle2, Clock, FileSearch, Lock, Mail, MessageSquare, Phone, Play, Printer, RotateCcw, Send, ShieldCheck, StickyNote, Trash2, User,
 } from 'lucide-react'
 import { ATTACHMENTS_BUCKET, supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { useToast } from '@/contexts/ToastContext'
-import { CATEGORY, CATEGORY_ORDER, PRIORITY, PRIORITY_ORDER, STATUS, STATUS_ORDER } from '@/lib/constants'
+import { CATEGORY, CATEGORY_ORDER, PRIORITY, PRIORITY_ORDER, STATUS } from '@/lib/constants'
 import { elapsed, formatDate, formatDateTime, formatTime, initials, ticketCode } from '@/lib/format'
 import { uploadAttachments } from '@/lib/tickets'
 import { friendlyError } from '@/lib/validation'
@@ -24,6 +24,15 @@ import type {
 } from '@/types/database'
 
 type Owner = Pick<Profile, 'id' | 'full_name' | 'email' | 'phone' | 'created_at'>
+/** Frase curta no topo do card de atendimento, dizendo o que falta fazer. */
+const NEXT_STEP_HINT: Record<TicketStatus, string> = {
+  aberto: 'Ninguém pegou este chamado ainda.',
+  em_andamento: 'Quando resolver, registre a solução.',
+  aguardando_usuario: 'Esperando o usuário responder.',
+  resolvido: 'Resolvido. O usuário pode reabrir se o problema voltar.',
+  encerrado: 'Encerrado. O usuário não pode mais escrever.',
+}
+
 type PendingChange = { field: 'status'; value: TicketStatus; title: string; text: string; label: string; danger?: boolean }
 
 export function TicketDetail({ number, admin }: { number: number; admin: boolean }) {
@@ -53,6 +62,7 @@ export function TicketDetail({ number, admin }: { number: number; admin: boolean
 
   // admin
   const [solution, setSolution] = useState('')
+  const [solving, setSolving] = useState(false)
   const [savingField, setSavingField] = useState<string | null>(null)
   const [pending, setPending] = useState<PendingChange | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -308,8 +318,101 @@ export function TicketDetail({ number, admin }: { number: number; admin: boolean
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <div className="min-w-0 space-y-6">
+      {/* No celular o card de atendimento vem antes da conversa; no computador fica no topo da lateral. */}
+      <div className="grid content-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:grid-rows-[auto_1fr]">
+        {admin && (
+          <Card className="no-print lg:col-start-2 lg:row-start-1">
+            <CardHeader title="Atendimento" description={NEXT_STEP_HINT[ticket.status]} />
+            <div className="space-y-4 p-5">
+              {ticket.status === 'aberto' && !solving ? (
+                <Button className="w-full" icon={<Play className="size-4" />} onClick={() => requestStatus('em_andamento')} loading={savingField === 'status'}>
+                  Iniciar atendimento
+                </Button>
+              ) : (
+                <div>
+                  <Textarea
+                    label={finished ? 'Solução registrada' : 'Solução'}
+                    rows={3}
+                    value={solution}
+                    onChange={(e) => setSolution(e.target.value)}
+                    maxLength={5000}
+                    placeholder="Ex.: troquei a fonte do computador…"
+                    hint={finished ? undefined : 'Ao registrar, o chamado passa para Resolvido e o usuário é avisado.'}
+                  />
+                  <Button
+                    variant={finished ? 'secondary' : 'primary'}
+                    className="mt-3 w-full"
+                    icon={finished ? undefined : <CheckCircle2 className="size-4" />}
+                    onClick={saveSolution}
+                    loading={savingField === 'solution'}
+                  >
+                    {finished ? 'Salvar alteração na solução' : 'Registrar solução'}
+                  </Button>
+                </div>
+              )}
+
+              {/* Ações secundárias: só as que fazem sentido no status atual */}
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                {ticket.status === 'aberto' && (
+                  <button type="button" className="font-medium text-brand-sky hover:underline" onClick={() => setSolving((v) => !v)}>
+                    {solving ? 'Voltar' : 'Já resolveu? Registrar solução'}
+                  </button>
+                )}
+                {ticket.status === 'em_andamento' && (
+                  <button type="button" className="font-medium text-brand-sky hover:underline" onClick={() => requestStatus('aguardando_usuario')}>
+                    Aguardar resposta do usuário
+                  </button>
+                )}
+                {ticket.status === 'aguardando_usuario' && (
+                  <button type="button" className="font-medium text-brand-sky hover:underline" onClick={() => requestStatus('em_andamento')}>
+                    Retomar atendimento
+                  </button>
+                )}
+                {finished && (
+                  <button type="button" className="flex items-center gap-1 font-medium text-brand-sky hover:underline" onClick={() => requestStatus('em_andamento')}>
+                    <RotateCcw className="size-3.5" /> Reabrir chamado
+                  </button>
+                )}
+                {!closed && (
+                  <button type="button" className="flex items-center gap-1 text-muted hover:text-ink hover:underline" onClick={() => requestStatus('encerrado')}>
+                    <Lock className="size-3.5" /> {finished ? 'Encerrar atendimento' : 'Encerrar sem solução'}
+                  </button>
+                )}
+              </div>
+
+              <div className="grid gap-3 border-t border-line pt-4 sm:grid-cols-2 lg:grid-cols-1">
+                <Select
+                  label="Prioridade"
+                  value={ticket.priority}
+                  onChange={(e) => update({ priority: e.target.value as TicketPriority }, 'priority', 'Prioridade alterada.')}
+                  disabled={savingField === 'priority'}
+                >
+                  {PRIORITY_ORDER.map((p) => (
+                    <option key={p} value={p}>{PRIORITY[p].label}</option>
+                  ))}
+                </Select>
+                <Select
+                  label="Categoria"
+                  value={ticket.category}
+                  onChange={(e) => update({ category: e.target.value as TicketCategory }, 'category', 'Categoria alterada.')}
+                  disabled={savingField === 'category'}
+                >
+                  {CATEGORY_ORDER.map((c) => (
+                    <option key={c} value={c}>{CATEGORY[c]}</option>
+                  ))}
+                </Select>
+              </div>
+
+              <div className="border-t border-line pt-3">
+                <button type="button" className="flex items-center gap-1.5 text-sm text-red-600 hover:underline dark:text-red-400" onClick={() => setConfirmDelete(true)}>
+                  <Trash2 className="size-3.5" /> Excluir chamado
+                </button>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        <div className="min-w-0 space-y-6 lg:col-start-1 lg:row-span-2 lg:row-start-1">
           <Card>
             <CardHeader title="Descrição do problema" />
             <div className="space-y-4 p-5">
@@ -508,89 +611,7 @@ export function TicketDetail({ number, admin }: { number: number; admin: boolean
         </div>
 
         {/* Coluna lateral */}
-        <div className="space-y-6">
-          {admin && (
-            <Card className="no-print">
-              <CardHeader title="Atendimento" />
-              <div className="space-y-4 p-5">
-                <Select
-                  label="Status"
-                  value={ticket.status}
-                  onChange={(e) => requestStatus(e.target.value as TicketStatus)}
-                  disabled={savingField === 'status'}
-                >
-                  {STATUS_ORDER.map((s) => (
-                    <option key={s} value={s}>{STATUS[s].label}</option>
-                  ))}
-                </Select>
-                <Select
-                  label="Prioridade"
-                  value={ticket.priority}
-                  onChange={(e) => update({ priority: e.target.value as TicketPriority }, 'priority', 'Prioridade alterada.')}
-                  disabled={savingField === 'priority'}
-                >
-                  {PRIORITY_ORDER.map((p) => (
-                    <option key={p} value={p}>{PRIORITY[p].label}</option>
-                  ))}
-                </Select>
-                <Select
-                  label="Categoria"
-                  value={ticket.category}
-                  onChange={(e) => update({ category: e.target.value as TicketCategory }, 'category', 'Categoria alterada.')}
-                  disabled={savingField === 'category'}
-                >
-                  {CATEGORY_ORDER.map((c) => (
-                    <option key={c} value={c}>{CATEGORY[c]}</option>
-                  ))}
-                </Select>
-
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                  {ticket.status === 'aberto' && (
-                    <Button size="sm" className="col-span-2" onClick={() => requestStatus('em_andamento')} loading={savingField === 'status'}>
-                      Iniciar atendimento
-                    </Button>
-                  )}
-                  {!finished && ticket.status !== 'aguardando_usuario' && (
-                    <Button size="sm" variant="secondary" className="col-span-2" onClick={() => requestStatus('aguardando_usuario')}>
-                      Aguardar resposta do usuário
-                    </Button>
-                  )}
-                  {!closed && (
-                    <Button size="sm" variant="secondary" className="col-span-2" icon={<Lock className="size-3.5" />} onClick={() => requestStatus('encerrado')}>
-                      Encerrar atendimento
-                    </Button>
-                  )}
-                  {finished && (
-                    <Button size="sm" variant="secondary" className="col-span-2" icon={<RotateCcw className="size-3.5" />} onClick={() => requestStatus('em_andamento')}>
-                      Reabrir chamado
-                    </Button>
-                  )}
-                </div>
-
-                <div className="border-t border-line pt-4">
-                  <Textarea
-                    label="Solução"
-                    rows={4}
-                    value={solution}
-                    onChange={(e) => setSolution(e.target.value)}
-                    maxLength={5000}
-                    placeholder="Ex.: troquei a fonte do computador…"
-                    hint={finished ? undefined : 'Ao registrar, o chamado passa para Resolvido.'}
-                  />
-                  <Button size="sm" variant="accent" className="mt-3 w-full" onClick={saveSolution} loading={savingField === 'solution'}>
-                    Registrar solução
-                  </Button>
-                </div>
-
-                <div className="border-t border-line pt-4">
-                  <Button size="sm" variant="ghost" className="w-full text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10" icon={<Trash2 className="size-3.5" />} onClick={() => setConfirmDelete(true)}>
-                    Excluir chamado
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          )}
-
+        <div className="space-y-6 lg:col-start-2 lg:row-start-2">
           {admin && owner && (
             <Card>
               <CardHeader title="Solicitante" />
