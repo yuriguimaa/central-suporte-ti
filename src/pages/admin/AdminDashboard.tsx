@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Flame } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import { CATEGORY, CATEGORY_ORDER, PRIORITY, PRIORITY_ORDER, PRIORITY_SHADE, STATUS, STATUS_ORDER } from '@/lib/constants'
+import { CATEGORY, CATEGORY_ORDER, PRIORITY, PRIORITY_ORDER, STATUS, STATUS_ORDER } from '@/lib/constants'
 import { fetchTickets } from '@/lib/tickets'
 import { timeAgo } from '@/lib/format'
 import { friendlyError } from '@/lib/validation'
@@ -31,7 +31,7 @@ export default function AdminDashboard() {
     try {
       const [s, r, u] = await Promise.all([
         supabase.rpc('admin_dashboard_stats'),
-        fetchTickets({ pageSize: 8, withOwner: true }),
+        fetchTickets({ pageSize: 6, withOwner: true }),
         supabase
           .from('tickets')
           .select('*, owner:profiles!tickets_user_id_fkey(id, full_name, email, phone)')
@@ -69,18 +69,27 @@ export default function AdminDashboard() {
     const d = new Date(`${m.month}-15T12:00:00`)
     return { key: m.month, label: monthShort.format(d).replace('.', ''), full: monthLong.format(d), value: m.count }
   })
+  const queue = (s.aberto ?? 0) + (s.em_andamento ?? 0) + (s.aguardando_usuario ?? 0)
+  const avg = stats?.avg_resolution_hours
+  const finding = stats
+    ? `${queue} ${queue === 1 ? 'chamado na fila' : 'chamados na fila'}${avg != null ? `. Tempo médio de solução: ${avg.toLocaleString('pt-BR')} h.` : '.'}`
+    : undefined
 
   return (
     <>
-      <PageHeader title="Dashboard" description="Visão geral do atendimento, atualizada em tempo real." />
+      <PageHeader
+        title="Dashboard"
+        description={finding}
+        actions={<ButtonLink to="/admin/chamados?status=aberto">Atender chamados abertos</ButtonLink>}
+      />
       {error && <div className="mb-4"><Alert>{error}</Alert></div>}
 
       {urgent.length > 0 && (
-        <Card className="mb-6 overflow-hidden border-red-200 dark:border-red-500/30">
-          <div className="flex items-center justify-between gap-3 border-b border-red-100 bg-red-50 px-5 py-3 dark:border-red-500/20 dark:bg-red-500/10">
-            <p className="flex items-center gap-2 font-display text-sm font-semibold text-red-800 dark:text-red-300">
-              <Flame className="size-4" /> {urgent.length} {urgent.length === 1 ? 'chamado urgente aguardando' : 'chamados urgentes aguardando'}
-            </p>
+        <section className="mb-6 overflow-hidden rounded-xl border border-red-200 dark:border-red-500/30" aria-labelledby="urgentes">
+          <div className="flex items-center justify-between gap-3 bg-red-50 px-5 py-2.5 dark:bg-red-500/10">
+            <h2 id="urgentes" className="flex items-center gap-2 text-sm font-semibold text-red-800 dark:text-red-300">
+              <Flame className="size-4" aria-hidden /> {urgent.length} {urgent.length === 1 ? 'chamado urgente sem solução' : 'chamados urgentes sem solução'}
+            </h2>
             <Link to="/admin/chamados?prioridade=urgente" className="text-sm font-medium text-red-700 hover:underline dark:text-red-300">Ver todos</Link>
           </div>
           <ul className="divide-y divide-line">
@@ -88,72 +97,66 @@ export default function AdminDashboard() {
               <li key={t.id}>
                 <Link to={`/admin/chamados/${t.ticket_number}`} className="flex flex-wrap items-center gap-x-4 gap-y-1 px-5 py-3 hover:bg-surface-2">
                   <ProtocolTag number={t.ticket_number} />
-                  <span className="min-w-0 flex-1 truncate text-sm text-ink">{t.title}</span>
-                  <span className="text-xs text-muted">{t.owner?.full_name} · aberto {timeAgo(t.created_at)}</span>
+                  <span className="min-w-0 flex-1 text-sm font-medium text-ink max-sm:order-1 max-sm:basis-full sm:truncate">{t.title}</span>
+                  <span className="text-sm text-muted max-sm:order-2">{t.owner?.full_name}, aberto {timeAgo(t.created_at)}</span>
                   <StatusBadge status={t.status} />
                 </Link>
               </li>
             ))}
           </ul>
-        </Card>
+        </section>
       )}
 
       <StatStrip
-        cols="lg:grid-cols-4"
-        items={[
-          { label: 'Total de chamados', value: stats?.total ?? null, to: '/admin/chamados' },
-          ...STATUS_ORDER.map((st) => ({
-            label: STATUS[st].label,
-            value: stats ? s[st] ?? 0 : null,
-            dot: STATUS[st].dot,
-            to: `/admin/chamados?status=${st}`,
-          })),
-          { label: 'Usuários cadastrados', value: stats?.users ?? null, to: '/admin/usuarios' },
-          {
-            label: 'Tempo médio de solução',
-            value: stats ? (stats.avg_resolution_hours != null ? `${stats.avg_resolution_hours.toLocaleString('pt-BR')} h` : '—') : null,
-          },
-        ]}
+        items={STATUS_ORDER.map((st) => ({
+          label: STATUS[st].label,
+          value: stats ? s[st] ?? 0 : null,
+          dot: STATUS[st].dot,
+          to: `/admin/chamados?status=${st}`,
+          hint: st === 'resolvido' && stats ? `de ${stats.total} no total` : undefined,
+        }))}
       />
+
+      <Card className="mt-6 overflow-hidden">
+        <CardHeader
+          title="Últimos chamados"
+          action={<Link to="/admin/chamados" className="text-sm font-medium text-primary hover:underline">Ver todos</Link>}
+        />
+        <TicketTable rows={recent} loading={loading} basePath="/admin/chamados" showOwner empty={{ title: 'Nenhum chamado registrado ainda' }} />
+      </Card>
 
       {loading && !stats ? (
         <Spinner />
       ) : (
-        <div className="mt-6 grid gap-6 lg:grid-cols-2">
-          <Card className="lg:col-span-2">
-            <CardHeader title="Chamados por mês" description="Últimos 12 meses" />
-            <div className="p-5"><ColumnChart data={months} /></div>
-          </Card>
+        // 3 colunas: o gráfico do mês e a prioridade ocupam 2, a categoria (lista mais longa) ocupa 1.
+        <div className="mt-6 grid items-start gap-6 lg:grid-cols-3">
+          <div className="grid gap-6 lg:col-span-2">
+            <Card>
+              <CardHeader title="Chamados por mês" description={`Últimos ${months.length} meses`} />
+              <div className="px-5 pt-3 pb-5"><ColumnChart data={months} height={148} /></div>
+            </Card>
+            <Card>
+              <CardHeader title="Chamados por prioridade" />
+              <div className="px-5 pt-2 pb-5">
+                <HBarList
+                  highlightFirst={false}
+                  data={PRIORITY_ORDER.map((p) => ({ key: p, label: PRIORITY[p].label, value: stats?.by_priority?.[p] ?? 0, color: p === 'urgente' ? 'bg-red-600' : undefined }))}
+                />
+              </div>
+            </Card>
+          </div>
           <Card>
             <CardHeader title="Chamados por categoria" />
-            <div className="p-5">
+            <div className="px-5 pt-2 pb-5">
               <HBarList
+                gap="space-y-3.5"
                 data={CATEGORY_ORDER.map((c) => ({ key: c, label: CATEGORY[c], value: stats?.by_category?.[c] ?? 0 }))
                   .sort((a, b) => b.value - a.value)}
               />
             </div>
           </Card>
-          <div className="grid gap-6">
-            <Card>
-              <CardHeader title="Chamados por prioridade" />
-              <div className="p-5">
-                <HBarList data={PRIORITY_ORDER.map((p) => ({ key: p, label: PRIORITY[p].label, value: stats?.by_priority?.[p] ?? 0, color: PRIORITY_SHADE[p] }))} />
-              </div>
-            </Card>
-            <Card>
-              <CardHeader title="Chamados por status" />
-              <div className="p-5">
-                <HBarList data={STATUS_ORDER.map((st) => ({ key: st, label: STATUS[st].label, value: s[st] ?? 0, color: STATUS[st].dot }))} />
-              </div>
-            </Card>
-          </div>
         </div>
       )}
-
-      <Card className="mt-6 overflow-hidden">
-        <CardHeader title="Chamados recentes" action={<ButtonLink to="/admin/chamados" variant="secondary" size="sm">Ver todos</ButtonLink>} />
-        <TicketTable rows={recent} loading={loading} basePath="/admin/chamados" showOwner empty={{ title: 'Nenhum chamado registrado ainda' }} />
-      </Card>
     </>
   )
 }

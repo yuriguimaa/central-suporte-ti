@@ -18,11 +18,14 @@
   --tag-bg: #d2bcff;
   --tag-fg: #2a0763;
 
+  /* Moldura do app (barra lateral + barra do topo) num lavanda quase cinza,
+     tirado do roxo da marca; o trabalho fica numa folha branca sem sombra. */
   --bg: #ffffff;
-  --bg-app: #eeebf4;
+  --bg-app: #f4f2f8;
+  --nav-active: #e6e1ef;
   --surface: #ffffff;
-  --surface-2: #f6f3fb;
-  --border: #ddd6ea;
+  --surface-2: #f6f4fa;
+  --border: #e6e1ef;
   --text: #170b30;
   --muted: #5e5577;
   --primary: var(--navy-900);
@@ -36,9 +39,10 @@
 .dark {
   --bg: #0e0622;
   --bg-app: #0e0622;
-  --surface: #180b36;
-  --surface-2: #200f47;
-  --border: #35215f;
+  --nav-active: #24134c;
+  --surface: #150a30;
+  --surface-2: #1d0e42;
+  --border: #2d1a57;
   --text: #f0eafc;
   --muted: #ab9fc8;
   --primary: #cdb4ff;
@@ -74,6 +78,7 @@
 
   --color-bg: var(--bg);
   --color-bg-app: var(--bg-app);
+  --color-nav-active: var(--nav-active);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
   --color-line: var(--border);
@@ -98,8 +103,7 @@
   }
   h1, h2, h3, h4 {
     @apply font-display text-ink;
-    font-stretch: 116%;
-    font-weight: 650;
+    font-weight: 600;
     letter-spacing: -0.012em;
     line-height: 1.15;
     text-wrap: balance;
@@ -126,23 +130,13 @@
 }
 
 /* -------------------------------------------------------------------------
-   Linguagem visual: o "ticket". Picote, recortes laterais e etiqueta de
-   protocolo aparecem nos pontos em que o chamado é o assunto.
+   Linguagem visual: a etiqueta de protocolo é o elemento próprio do produto
+   e aparece onde o chamado é o assunto.
    ------------------------------------------------------------------------- */
 @layer components {
   /* Texto em largura expandida, como etiquetas de patrimônio */
   .font-display { font-stretch: 116%; }
   .wide { font-stretch: 125%; }
-
-  /* Recortes semicirculares nas laterais (meio da altura) */
-
-
-  /* Recortes no topo e na base, na posição do picote vertical (canhoto à direita) */
-
-
-  /* Linha de picote */
-  .perf-x { background: repeating-linear-gradient(90deg, currentColor 0 6px, transparent 6px 11px); height: 2px; }
-  .perf-y { background: repeating-linear-gradient(180deg, currentColor 0 6px, transparent 6px 11px); width: 2px; }
 
   /* Etiqueta de protocolo: fundo azul-claro com recorte à esquerda */
   .proto-tag {
@@ -158,44 +152,16 @@
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.01em;
     white-space: nowrap;
-    -webkit-mask: radial-gradient(circle 4px at 0 50%, #0000 97%, #000);
-    mask: radial-gradient(circle 4px at 0 50%, #0000 97%, #000);
-  }
-
-  /* Código de barras decorativo do canhoto */
-  .barcode {
-    background: repeating-linear-gradient(90deg,
-      currentColor 0 2px, transparent 2px 4px, currentColor 4px 5px, transparent 5px 8px,
-      currentColor 8px 11px, transparent 11px 12px, currentColor 12px 13px, transparent 13px 16px);
+    /* Recorte à esquerda: é máscara de forma, não preenchimento em degradê. taste-skill-ignore */
+    -webkit-mask: radial-gradient(circle 4px at 0 50%, #0000 97%, #000); /* taste-skill-ignore */
+    mask: radial-gradient(circle 4px at 0 50%, #0000 97%, #000); /* taste-skill-ignore */
   }
 }
 
-@utility ticket-cut-v {
-  --cut: 14px;
-  --cut-x: 68%;
-  -webkit-mask:
-    radial-gradient(circle var(--cut) at var(--cut-x) 0, #0000 98%, #000) top / 100% 51% no-repeat,
-    radial-gradient(circle var(--cut) at var(--cut-x) 100%, #0000 98%, #000) bottom / 100% 51% no-repeat;
-  mask:
-    radial-gradient(circle var(--cut) at var(--cut-x) 0, #0000 98%, #000) top / 100% 51% no-repeat,
-    radial-gradient(circle var(--cut) at var(--cut-x) 100%, #0000 98%, #000) bottom / 100% 51% no-repeat;
-}
-@utility ticket-cut {
-  --cut: 12px;
-  --cut-y: 50%;
-  -webkit-mask:
-    radial-gradient(circle var(--cut) at 0 var(--cut-y), #0000 98%, #000) left / 51% 100% no-repeat,
-    radial-gradient(circle var(--cut) at 100% var(--cut-y), #0000 98%, #000) right / 51% 100% no-repeat;
-  mask:
-    radial-gradient(circle var(--cut) at 0 var(--cut-y), #0000 98%, #000) left / 51% 100% no-repeat,
-    radial-gradient(circle var(--cut) at 100% var(--cut-y), #0000 98%, #000) right / 51% 100% no-repeat;
-}
 dialog { overscroll-behavior: contain; }
 
 /* Animações discretas */
 @keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
-@keyframes track-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-@keyframes stamp { 0% { opacity: 0; transform: scale(1.25) rotate(-8deg); } 60% { opacity: 1; transform: scale(0.96) rotate(-8deg); } 100% { opacity: 1; transform: scale(1) rotate(-8deg); } }
 .animate-fade-in { animation: fade-in 0.25s ease-out both; }
 
 /* Impressão dos detalhes do chamado */

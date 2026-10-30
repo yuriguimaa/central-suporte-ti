@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Eye, Inbox } from 'lucide-react'
+import { Inbox } from 'lucide-react'
 import type { TicketWithOwner } from '@/types/database'
 import { CATEGORY } from '@/lib/constants'
 import { formatDate, timeAgo } from '@/lib/format'
@@ -34,16 +34,21 @@ export function TicketTable({ rows, loading, basePath, showOwner, empty }: Props
               <th scope="col" className="px-3 py-3 font-medium">Categoria</th>
               <th scope="col" className="px-3 py-3 font-medium">Prioridade</th>
               <th scope="col" className="px-3 py-3 font-medium">Status</th>
-              <th scope="col" className="px-3 py-3 font-medium">Abertura</th>
-              <th scope="col" className="px-5 py-3"><span className="sr-only">Ações</span></th>
+              <th scope="col" className="px-5 py-3 text-right font-medium">Abertura</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
             {rows.map((t) => (
-              <tr key={t.id} className={`hover:bg-surface-2/70 ${t.priority === 'urgente' && !['resolvido', 'encerrado'].includes(t.status) ? 'shadow-[inset_3px_0_0_#dc2626]' : ''}`}>
-                <td className="px-5 py-3"><ProtocolTag number={t.ticket_number} /></td>
+              // A linha inteira abre o chamado: o link do assunto se estende sobre ela.
+              <tr key={t.id} className="relative hover:bg-surface-2 focus-within:bg-surface-2">
+                <td className={`border-l-[3px] py-3 pr-3 pl-[17px] ${t.priority === 'urgente' && !['resolvido', 'encerrado'].includes(t.status) ? 'border-red-600' : 'border-transparent'}`}>
+                  <ProtocolTag number={t.ticket_number} />
+                </td>
                 <td className="max-w-xs px-3 py-3">
-                  <Link to={`${basePath}/${t.ticket_number}`} className="line-clamp-1 font-medium text-ink hover:text-brand-sky">
+                  <Link
+                    to={`${basePath}/${t.ticket_number}`}
+                    className="line-clamp-1 font-medium text-ink after:absolute after:inset-0"
+                  >
                     {t.title}
                   </Link>
                 </td>
@@ -51,17 +56,9 @@ export function TicketTable({ rows, loading, basePath, showOwner, empty }: Props
                 <td className="px-3 py-3 text-muted">{CATEGORY[t.category]}</td>
                 <td className="px-3 py-3"><PriorityBadge priority={t.priority} /></td>
                 <td className="px-3 py-3"><StatusBadge status={t.status} /></td>
-                <td className="px-3 py-3 whitespace-nowrap text-muted">
-                  <span className="tabular block">{formatDate(t.created_at)}</span>
-                  <span className="text-xs">{timeAgo(t.created_at)}</span>
-                </td>
-                <td className="px-5 py-3 text-right">
-                  <Link
-                    to={`${basePath}/${t.ticket_number}`}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-line px-2.5 py-1.5 text-xs font-medium text-ink hover:border-brand-sky hover:text-primary"
-                  >
-                    <Eye className="size-3.5" /> Visualizar
-                  </Link>
+                <td className="px-5 py-3 text-right whitespace-nowrap">
+                  <span className="tabular block text-ink">{formatDate(t.created_at)}</span>
+                  <span className="text-xs text-muted">{timeAgo(t.created_at)}</span>
                 </td>
               </tr>
             ))}

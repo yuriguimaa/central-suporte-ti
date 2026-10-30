@@ -12,17 +12,9 @@ export const STATUS_ORDER: TicketStatus[] = ['aberto', 'em_andamento', 'aguardan
 
 export const PRIORITY: Record<TicketPriority, { label: string; badge: string; weight: number }> = {
   baixa: { label: 'Baixa', badge: 'text-slate-600 dark:text-slate-300', weight: 1 },
-  media: { label: 'Média', badge: 'text-violet-700 dark:text-violet-300', weight: 2 },
+  media: { label: 'Média', badge: 'text-slate-700 dark:text-slate-200', weight: 2 },
   alta: { label: 'Alta', badge: 'text-orange-700 dark:text-orange-300', weight: 3 },
   urgente: { label: 'Urgente', badge: 'text-red-700 dark:text-red-300', weight: 4 },
-}
-
-// Tom único, do claro ao escuro, para gráficos (prioridade é ordinal)
-export const PRIORITY_SHADE: Record<TicketPriority, string> = {
-  baixa: 'bg-[#e0d2ff] dark:bg-[#42198f]',
-  media: 'bg-[#b08cf7] dark:bg-[#6c3fd0]',
-  alta: 'bg-[#7a3fe0] dark:bg-[#a985f5]',
-  urgente: 'bg-navy-900 dark:bg-[#e6daff]',
 }
 
 export const PRIORITY_ORDER: TicketPriority[] = ['baixa', 'media', 'alta', 'urgente']
