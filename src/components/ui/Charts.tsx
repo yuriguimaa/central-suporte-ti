@@ -7,28 +7,30 @@ export interface BarDatum {
   color?: string // classe Tailwind de fundo
 }
 
-/** Barras horizontais com rótulo e valor diretos (uma série, sem legenda). */
-export function HBarList({ data, color = 'bg-navy-700 dark:bg-brand-sky', emptyText = 'Sem dados ainda.' }: { data: BarDatum[]; color?: string; emptyText?: string }) {
+/**
+ * Lista ordenada com uma barra fina sob cada rótulo. As barras ficam em cinza e só o primeiro
+ * item leva a cor da marca, para que "o que mais pesa" seja visto e não só lido.
+ */
+export function HBarList({ data, emptyText = 'Sem dados ainda.', highlightFirst = true, gap = 'space-y-2.5' }: { data: BarDatum[]; emptyText?: string; highlightFirst?: boolean; gap?: string }) {
   const max = Math.max(1, ...data.map((d) => d.value))
   const total = data.reduce((s, d) => s + d.value, 0)
-  if (!total) return <p className="py-6 text-center text-sm text-muted">{emptyText}</p>
+  if (!total) return <p className="py-6 text-sm text-muted">{emptyText}</p>
   return (
-    <ul className="space-y-3">
-      {data.map((d) => {
-        const pct = total ? Math.round((d.value / total) * 100) : 0
+    <ul className={gap}>
+      {data.map((d, i) => {
+        const pct = Math.round((d.value / total) * 100)
+        const fill = d.color ?? (highlightFirst && i === 0 ? 'bg-primary' : 'bg-ink/25')
         return (
-          <li key={d.key} className="group" title={`${d.label}: ${d.value} (${pct}%)`}>
-            <div className="mb-1 flex items-baseline justify-between gap-3 text-sm">
+          <li key={d.key} title={`${d.label}: ${d.value} (${pct}%)`}>
+            <div className="flex items-baseline justify-between gap-3 text-sm">
               <span className="truncate text-ink">{d.label}</span>
-              <span className="tabular shrink-0 text-muted">
-                <span className="font-medium text-ink">{d.value}</span> · {pct}%
+              <span className="tabular shrink-0 text-right">
+                <span className="text-ink">{d.value}</span>
+                <span className="inline-block w-11 text-xs text-muted">{pct}%</span>
               </span>
             </div>
-            <div className="h-2 rounded-full bg-surface-2">
-              <div
-                className={`h-2 rounded-full transition-[width] duration-500 group-hover:opacity-80 ${d.color ?? color}`}
-                style={{ width: `${(d.value / max) * 100}%`, minWidth: d.value ? 4 : 0 }}
-              />
+            <div className="mt-1 h-[3px] rounded-full bg-surface-2">
+              <div className={`h-full rounded-full ${fill}`} style={{ width: `${(d.value / max) * 100}%` }} />
             </div>
           </li>
         )
@@ -37,30 +39,44 @@ export function HBarList({ data, color = 'bg-navy-700 dark:bg-brand-sky', emptyT
   )
 }
 
-/** Colunas verticais (ex.: chamados por mês) com tooltip ao passar o mouse ou focar. */
-export function ColumnChart({ data, height = 180 }: { data: { key: string; label: string; full: string; value: number }[]; height?: number }) {
+/** Passo "redondo" para o eixo: 1, 2, 5, 10, 20, 50… com 3 a 5 marcas acima do máximo. */
+function niceTicks(max: number) {
+  const steps = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000]
+  const step = steps.find((s) => Math.ceil(max / s) <= 4) ?? Math.ceil(max / 4)
+  const top = Math.max(step, Math.ceil(max / step) * step)
+  const ticks: number[] = []
+  for (let v = top; v >= 0; v -= step) ticks.push(v)
+  return { top, ticks }
+}
+
+/**
+ * Colunas por mês. Os meses fechados ficam em cinza; o mês corrente (o último) leva a cor da marca,
+ * porque é o número que o técnico acompanha.
+ */
+export function ColumnChart({ data, height = 168 }: { data: { key: string; label: string; full: string; value: number }[]; height?: number }) {
   const [hover, setHover] = useState<number | null>(null)
-  const max = Math.max(1, ...data.map((d) => d.value))
-  const ticks = [max, Math.round(max / 2), 0]
+  const { top, ticks } = niceTicks(Math.max(1, ...data.map((d) => d.value)))
+  const plot = height - 24
   return (
-    <div>
-      <div className="flex gap-2">
-        <div className="tabular flex flex-col justify-between pb-6 text-right text-[11px] text-muted" style={{ height }} aria-hidden>
-          {ticks.map((t, i) => (
-            <span key={i} className="-translate-y-1/2 first:translate-y-0 last:translate-y-0">{t}</span>
+    <div className="flex gap-3">
+      <div className="tabular relative w-6 text-right text-xs text-muted" style={{ height: plot }} aria-hidden>
+        {ticks.map((t) => (
+          <span key={t} className="absolute right-0 -translate-y-1/2" style={{ top: `${(1 - t / top) * 100}%` }}>{t}</span>
+        ))}
+      </div>
+      <div className="relative flex-1">
+        <div className="pointer-events-none absolute inset-x-0 top-0" style={{ height: plot }} aria-hidden>
+          {ticks.map((t) => (
+            <span key={t} className={`absolute inset-x-0 border-t ${t === 0 ? 'border-ink/30' : 'border-line'}`} style={{ top: `${(1 - t / top) * 100}%` }} />
           ))}
         </div>
-        <div className="relative flex-1">
-          <div className="pointer-events-none absolute inset-x-0 top-0 bottom-6 flex flex-col justify-between" aria-hidden>
-            <span className="border-t border-dashed border-line" />
-            <span className="border-t border-dashed border-line" />
-            <span className="border-t border-line" />
-          </div>
-          <ol className="relative flex items-end gap-1 sm:gap-2" style={{ height }} aria-label="Chamados por mês">
-            {data.map((d, i) => (
+        <ol className="relative flex items-end gap-2 sm:gap-4" style={{ height }} aria-label="Chamados por mês">
+          {data.map((d, i) => {
+            const current = i === data.length - 1
+            return (
               <li
                 key={d.key}
-                className="relative flex h-full flex-1 flex-col items-center justify-end rounded-sm"
+                className="relative flex h-full flex-1 flex-col items-center justify-end"
                 tabIndex={0}
                 onMouseEnter={() => setHover(i)}
                 onMouseLeave={() => setHover(null)}
@@ -69,20 +85,19 @@ export function ColumnChart({ data, height = 180 }: { data: { key: string; label
                 aria-label={`${d.full}: ${d.value} chamados`}
               >
                 {hover === i && (
-                  <span className="tabular absolute z-10 mb-1 rounded-lg border border-line bg-surface px-2.5 py-1.5 text-xs whitespace-nowrap text-ink shadow-lg" style={{ bottom: `calc(${(d.value / max) * (height - 24)}px + 30px)` }}>
-                    <span className="block text-muted">{d.full}</span>
-                    <span className="font-semibold">{d.value}</span> chamados
+                  <span className="tabular absolute z-10 rounded-md border border-line bg-surface px-2 py-1 text-xs whitespace-nowrap text-ink shadow-md" style={{ bottom: `calc(${(d.value / top) * plot}px + 30px)` }}>
+                    {d.full}: <span className="font-semibold">{d.value}</span>
                   </span>
                 )}
                 <span
-                  className={`w-full max-w-9 rounded-t-[4px] ${hover === i ? 'bg-navy-700 dark:bg-brand-sky-light' : 'bg-brand-sky'}`}
-                  style={{ height: `${(d.value / max) * (height - 24)}px`, minHeight: d.value ? 3 : 0 }}
+                  className={`w-full max-w-12 ${current ? 'bg-primary' : hover === i ? 'bg-ink/35' : 'bg-ink/15'}`}
+                  style={{ height: `${(d.value / top) * plot}px` }}
                 />
-                <span className="mt-1.5 h-[18px] text-[11px] text-muted">{d.label}</span>
+                <span className={`mt-1.5 h-[18px] text-xs ${current ? 'font-medium text-ink' : 'text-muted'}`}>{d.label}</span>
               </li>
-            ))}
-          </ol>
-        </div>
+            )
+          })}
+        </ol>
       </div>
     </div>
   )

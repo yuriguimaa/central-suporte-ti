@@ -21,10 +21,8 @@ export function FullPageSpinner() {
 export function EmptyState({ icon: Icon, title, text, action }: { icon: LucideIcon; title: string; text?: string; action?: ReactNode }) {
   return (
     <div className="flex flex-col items-center px-6 py-12 text-center">
-      <div className="mb-4 flex size-12 items-center justify-center rounded-2xl bg-sky-wash text-primary">
-        <Icon className="size-6" aria-hidden />
-      </div>
-      <p className="font-display text-base font-semibold">{title}</p>
+      <Icon className="mb-3 size-6 text-muted" strokeWidth={1.5} aria-hidden />
+      <p className="text-base font-semibold text-ink">{title}</p>
       {text && <p className="mt-1 max-w-sm text-sm text-muted">{text}</p>}
       {action && <div className="mt-5">{action}</div>}
     </div>

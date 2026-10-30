@@ -9,11 +9,11 @@ const base =
   'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-[background-color,border-color,color,transform] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-55 select-none whitespace-nowrap'
 
 const variants: Record<Variant, string> = {
-  primary: 'bg-primary text-primary-fg hover:bg-primary-hover shadow-sm',
-  accent: 'bg-brand-sky text-white hover:bg-navy-700 shadow-sm',
+  primary: 'bg-primary text-primary-fg hover:bg-primary-hover',
+  accent: 'bg-brand-sky text-white hover:bg-navy-700',
   secondary: 'border border-line bg-surface text-ink hover:border-brand-sky hover:text-primary',
   ghost: 'text-muted hover:bg-surface-2 hover:text-ink',
-  danger: 'bg-red-600 text-white hover:bg-red-700 shadow-sm',
+  danger: 'bg-red-600 text-white hover:bg-red-700',
   onDark: 'bg-brand-sky-light text-navy-950 hover:bg-white focus-visible:outline-white',
   onDarkOutline: 'border border-white/30 text-white hover:border-white/70 hover:bg-white/5 focus-visible:outline-white',
 }

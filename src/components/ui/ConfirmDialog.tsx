@@ -30,7 +30,7 @@ export function ConfirmDialog({ open, title, children, confirmLabel, tone = 'pri
         e.preventDefault()
         onCancel()
       }}
-      className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-line bg-surface p-0 text-ink shadow-2xl backdrop:bg-navy-950/50 backdrop:backdrop-blur-[2px]"
+      className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-line bg-surface p-0 text-ink shadow-2xl backdrop:bg-navy-950/50"
     >
       <div className="p-6">
         <h2 className="text-lg font-semibold">{title}</h2>

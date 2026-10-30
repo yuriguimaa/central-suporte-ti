@@ -276,14 +276,14 @@ export function TicketDetail({ number, admin }: { number: number; admin: boolean
         </Button>
       </div>
 
-      {/* Cabeçalho do chamado, no formato de ticket com canhoto */}
-      <div className="print-area mb-6 overflow-hidden rounded-2xl border border-line bg-surface lg:ticket-cut-v lg:grid lg:grid-cols-[minmax(0,1fr)_18rem] lg:[--cut-x:calc(100%-18rem)]">
-        <div className="min-w-0 p-5 sm:p-7">
+      {/* Cabeçalho do chamado: o protocolo e o tempo ficam numa coluna à direita, no mesmo cartão. */}
+      <div className="print-area mb-6 overflow-hidden rounded-xl border border-line bg-surface lg:grid lg:grid-cols-[minmax(0,1fr)_16rem]">
+        <div className="min-w-0 p-5 sm:p-6">
           <div className="flex flex-wrap items-center gap-2.5">
             <StatusBadge status={ticket.status} />
             <PriorityBadge priority={ticket.priority} />
           </div>
-          <h1 className="wide mt-3 text-[1.45rem] break-words sm:text-[1.8rem]">{ticket.title}</h1>
+          <h1 className="mt-3 text-2xl break-words">{ticket.title}</h1>
           <dl className="mt-5 grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-3">
             {meta.filter((m) => !m.label.startsWith('Tempo')).map((m) => (
               <div key={m.label} className="min-w-0">
@@ -293,17 +293,20 @@ export function TicketDetail({ number, admin }: { number: number; admin: boolean
             ))}
           </dl>
         </div>
-        <div className={`relative flex flex-col justify-between gap-4 p-5 text-white sm:p-7 ${ticket.priority === 'urgente' && !finished ? 'bg-red-700' : 'bg-navy-900 dark:bg-[#2a1262]'}`}>
+        <div
+          className={`flex flex-row flex-wrap justify-between gap-4 p-5 sm:p-6 lg:flex-col ${
+            ticket.priority === 'urgente' && !finished ? 'bg-red-50 dark:bg-red-500/10' : 'bg-surface-2'
+          }`}
+        >
           <div>
-            <p className="text-xs text-sky-100/70">Protocolo</p>
-            <p className="tabular wide font-display text-[2.1rem] leading-none font-bold" translate="no">{ticketCode(ticket.ticket_number)}</p>
+            <p className="text-xs text-muted">Protocolo</p>
+            <p className="tabular mt-1 text-[1.75rem] leading-none font-semibold text-ink" translate="no">{ticketCode(ticket.ticket_number)}</p>
           </div>
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <p className="text-xs text-sky-100/70">{finished ? 'Tempo até a solução' : 'Aberto há'}</p>
-              <p className="tabular font-display text-lg font-semibold">{elapsed(ticket.created_at, ticket.resolved_at ?? ticket.closed_at)}</p>
-            </div>
-            <div className="barcode h-9 w-20 text-white/40" aria-hidden />
+          <div>
+            <p className="text-xs text-muted">{finished ? 'Tempo até a solução' : 'Aberto há'}</p>
+            <p className={`tabular mt-1 text-lg font-medium ${ticket.priority === 'urgente' && !finished ? 'text-red-700 dark:text-red-300' : 'text-ink'}`}>
+              {elapsed(ticket.created_at, ticket.resolved_at ?? ticket.closed_at)}
+            </p>
           </div>
         </div>
       </div>
@@ -325,7 +328,7 @@ export function TicketDetail({ number, admin }: { number: number; admin: boolean
 
           {ticket.solution && !finished && (
             // Chamado reaberto: a solução anterior continua visível, marcada como "não resolveu".
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 dark:border-amber-500/30 dark:bg-amber-500/10">
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 dark:border-amber-500/30 dark:bg-amber-500/10">
               <p className="flex items-center gap-2 font-display text-sm font-semibold text-amber-800 dark:text-amber-300">
                 <RotateCcw className="size-4" /> Solução anterior: o problema voltou
               </p>
@@ -337,7 +340,7 @@ export function TicketDetail({ number, admin }: { number: number; admin: boolean
           )}
 
           {ticket.solution && finished && (
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 dark:border-emerald-500/30 dark:bg-emerald-500/10">
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5 dark:border-emerald-500/30 dark:bg-emerald-500/10">
               <p className="flex items-center gap-2 font-display text-sm font-semibold text-emerald-800 dark:text-emerald-300">
                 <ShieldCheck className="size-4" /> Solução registrada
               </p>
@@ -425,7 +428,7 @@ export function TicketDetail({ number, admin }: { number: number; admin: boolean
                         aria-checked={internal === o.v}
                         onClick={() => setInternal(o.v)}
                         className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 ${
-                          internal === o.v ? 'bg-surface font-medium text-ink shadow-sm' : 'text-muted hover:text-ink'
+                          internal === o.v ? 'bg-surface font-medium text-ink ring-1 ring-line' : 'text-muted hover:text-ink'
                         }`}
                       >
                         <o.icon className="size-3.5" /> {o.label}

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Download, FileBarChart } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/contexts/ToastContext'
-import { CATEGORY, CATEGORY_ORDER, PRIORITY, PRIORITY_ORDER, PRIORITY_SHADE, STATUS, STATUS_ORDER } from '@/lib/constants'
+import { CATEGORY, CATEGORY_ORDER, PRIORITY, PRIORITY_ORDER, STATUS, STATUS_ORDER } from '@/lib/constants'
 import { downloadCsv } from '@/lib/csv'
 import { elapsed, formatDateTime, ticketCode } from '@/lib/format'
 import { friendlyError } from '@/lib/validation'
@@ -12,6 +12,7 @@ import { Card, CardHeader } from '@/components/ui/Card'
 import { Input, Select } from '@/components/ui/Field'
 import { Alert, EmptyState, Spinner } from '@/components/ui/Feedback'
 import { HBarList } from '@/components/ui/Charts'
+import { StatStrip } from '@/components/ui/StatStrip'
 import type { TicketCategory, TicketStatus, TicketWithOwner } from '@/types/database'
 
 // Data local no formato AAAA-MM-DD (evita virar o dia por causa do fuso)
@@ -77,7 +78,7 @@ export default function AdminReports() {
       avgH,
       byStatus: count(STATUS_ORDER, (r) => r.status).map((x) => ({ ...x, label: STATUS[x.key].label, color: STATUS[x.key].dot })),
       byCategory: count(CATEGORY_ORDER, (r) => r.category).map((x) => ({ ...x, label: CATEGORY[x.key] })).sort((a, b) => b.value - a.value),
-      byPriority: count(PRIORITY_ORDER, (r) => r.priority).map((x) => ({ ...x, label: PRIORITY[x.key].label, color: PRIORITY_SHADE[x.key] })),
+      byPriority: count(PRIORITY_ORDER, (r) => r.priority).map((x) => ({ ...x, label: PRIORITY[x.key].label, color: x.key === 'urgente' ? 'bg-red-600' : undefined })),
     }
   }, [rows])
 
@@ -135,23 +136,21 @@ export default function AdminReports() {
         <Card><EmptyState icon={FileBarChart} title="Nenhum chamado no período" text="Escolha outro intervalo de datas ou remova os filtros." /></Card>
       ) : (
         <>
-          <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-            {[
-              { label: 'Chamados no período', value: summary.total },
-              { label: 'Resolvidos', value: summary.resolved },
-              { label: 'Urgentes', value: summary.urgent },
-              { label: 'Tempo médio de solução', value: summary.avgH != null ? `${summary.avgH.toFixed(1)} h` : '—' },
-            ].map((s) => (
-              <Card key={s.label} className="p-4 sm:p-5">
-                <p className="text-sm text-muted">{s.label}</p>
-                <p className="tabular mt-2 font-display text-2xl font-semibold">{s.value}</p>
-              </Card>
-            ))}
+          <div className="mb-6">
+            <StatStrip
+              cols="lg:grid-cols-4"
+              items={[
+                { label: 'Chamados no período', value: summary.total },
+                { label: 'Resolvidos', value: summary.resolved },
+                { label: 'Urgentes', value: summary.urgent },
+                { label: 'Tempo médio de solução', value: summary.avgH != null ? `${summary.avgH.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} h` : '–' },
+              ]}
+            />
           </div>
           <div className="grid gap-6 lg:grid-cols-3">
-            <Card><CardHeader title="Por status" /><div className="p-5"><HBarList data={summary.byStatus} /></div></Card>
+            <Card><CardHeader title="Por status" /><div className="p-5"><HBarList data={summary.byStatus} highlightFirst={false} /></div></Card>
             <Card><CardHeader title="Por categoria" /><div className="p-5"><HBarList data={summary.byCategory} /></div></Card>
-            <Card><CardHeader title="Por prioridade" /><div className="p-5"><HBarList data={summary.byPriority} /></div></Card>
+            <Card><CardHeader title="Por prioridade" /><div className="p-5"><HBarList data={summary.byPriority} highlightFirst={false} /></div></Card>
           </div>
         </>
       )}
