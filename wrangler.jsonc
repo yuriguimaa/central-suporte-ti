@@ -8,5 +8,7 @@
     "directory": "./dist",
     // Rotas como /painel/chamados/12 abrem o index.html (React Router cuida do resto).
     "not_found_handling": "single-page-application"
-  }
+  },
+  // Necessário para o "npx wrangler preview" (prévias dos PRs na Cloudflare).
+  "previews": {}
 }
