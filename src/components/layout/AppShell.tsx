@@ -113,12 +113,12 @@ export function AppShell({ nav, home, areaLabel }: { nav: NavGroup[]; home: stri
         Pular para o conteúdo
       </a>
 
-      <aside className="no-print fixed inset-y-0 left-0 z-40 hidden w-64 bg-navy-900 dark:bg-[#0a1c44] lg:block">{sidebar}</aside>
+      <aside className="no-print fixed inset-y-0 left-0 z-40 hidden w-64 bg-navy-900 dark:bg-[#1a0840] lg:block">{sidebar}</aside>
 
       {open && (
         <div className="no-print fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-navy-950/60" onClick={() => setOpen(false)} aria-hidden />
-          <aside className="animate-fade-in absolute inset-y-0 left-0 w-72 max-w-[85vw] overscroll-contain bg-navy-900 shadow-2xl dark:bg-[#0a1c44]">{sidebar}</aside>
+          <aside className="animate-fade-in absolute inset-y-0 left-0 w-72 max-w-[85vw] overscroll-contain bg-navy-900 shadow-2xl dark:bg-[#1a0840]">{sidebar}</aside>
         </div>
       )}
 

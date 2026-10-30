@@ -293,7 +293,7 @@ export function TicketDetail({ number, admin }: { number: number; admin: boolean
             ))}
           </dl>
         </div>
-        <div className={`relative flex flex-col justify-between gap-4 p-5 text-white sm:p-7 ${ticket.priority === 'urgente' && !finished ? 'bg-red-700' : 'bg-navy-900 dark:bg-[#12295c]'}`}>
+        <div className={`relative flex flex-col justify-between gap-4 p-5 text-white sm:p-7 ${ticket.priority === 'urgente' && !finished ? 'bg-red-700' : 'bg-navy-900 dark:bg-[#2a1262]'}`}>
           <div>
             <p className="text-xs text-sky-100/70">Protocolo</p>
             <p className="tabular wide font-display text-[2.1rem] leading-none font-bold" translate="no">{ticketCode(ticket.ticket_number)}</p>

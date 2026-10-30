@@ -66,7 +66,7 @@ export default function Landing() {
     <>
       <section className="bg-bg-app px-4 py-10 sm:px-6 sm:py-14 lg:py-20">
         <div className="mx-auto max-w-6xl">
-          <div className="overflow-hidden rounded-[28px] bg-navy-900 text-white shadow-[0_30px_80px_-30px_rgba(10,36,99,0.6)] lg:ticket-cut-v lg:grid lg:grid-cols-[68%_32%]">
+          <div className="overflow-hidden rounded-[28px] bg-navy-900 text-white shadow-[0_30px_80px_-30px_rgba(75,12,164,0.55)] lg:ticket-cut-v lg:grid lg:grid-cols-[68%_32%]">
             <div className="relative p-7 sm:p-10 lg:p-14">
               <h1 className="wide max-w-2xl text-[2.35rem] leading-[1.02] font-bold text-white sm:text-[3.4rem] lg:text-[4rem]">
                 Bem-vindo à {brand.name}
@@ -138,7 +138,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="bg-brand-sky-light dark:bg-[#12295c]">
+      <section className="bg-brand-sky-light dark:bg-[#2a1262]">
         <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-4 py-12 sm:px-6 md:flex-row md:items-center">
           <div>
             <h2 className="wide text-2xl text-navy-950 dark:text-white">Algo parou de funcionar?</h2>

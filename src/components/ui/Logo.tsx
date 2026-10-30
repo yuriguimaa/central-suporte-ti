@@ -1,7 +1,7 @@
 import { brand } from '@/config/brand'
 
 /**
- * Marca: atendente com headset e notebook, em duotom nas cores do site (azul-escuro sobre azul-claro).
+ * Marca: atendente com headset e notebook, em duotom nas cores do site (roxo sobre lavanda).
  * Para trocar a logomarca, substitua public/logo-mark.png, public/favicon.png e public/apple-touch-icon.png.
  */
 export function LogoMark({ className = 'size-9' }: { className?: string; light?: boolean }) {

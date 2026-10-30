@@ -6,48 +6,58 @@
    Tokens da identidade visual. Para mudar as cores da marca, altere aqui.
    ------------------------------------------------------------------------- */
 :root {
-  /* Paleta: azul-escuro (cobalto profundo), azul-claro (etiqueta) e branco */
-  --navy-950: #05173a;
-  --navy-900: #0a2463;
-  --navy-800: #11317c;
-  --navy-700: #1d4aa8;
-  --sky: #2f86eb;
-  --sky-light: #8ecbff;
-  --sky-wash: #e4f1ff;
-  --tag-bg: #8ecbff;
-  --tag-fg: #061b4d;
+  /* Paleta: roxo da marca (#4B0CA4), lavanda (etiqueta) e branco.
+     Os nomes navy/sky foram mantidos como papéis (escuro/claro) para não mexer nos componentes. */
+  --navy-950: #22055a;
+  --navy-900: #4b0ca4;
+  --navy-800: #5a18bf;
+  --navy-700: #6c2ad6;
+  --sky: #7a3fe0;
+  --sky-light: #d2bcff;
+  --sky-wash: #f1eaff;
+  --tag-bg: #d2bcff;
+  --tag-fg: #2a0763;
 
   --bg: #ffffff;
-  --bg-app: #e9edf2;
+  --bg-app: #eeebf4;
   --surface: #ffffff;
-  --surface-2: #f3f6fa;
-  --border: #d6dde7;
-  --text: #0a1630;
-  --muted: #52607a;
+  --surface-2: #f6f3fb;
+  --border: #ddd6ea;
+  --text: #170b30;
+  --muted: #5e5577;
   --primary: var(--navy-900);
   --primary-hover: var(--navy-800);
   --primary-fg: #ffffff;
   --accent: var(--sky);
-  --ring: #2f86eb;
+  --ring: #7a3fe0;
   color-scheme: light;
 }
 
 .dark {
-  --bg: #050f24;
-  --bg-app: #050f24;
-  --surface: #0b1a3a;
-  --surface-2: #10234c;
-  --border: #1e3466;
-  --text: #e6eefb;
-  --muted: #95a6c4;
-  --primary: #8ecbff;
-  --primary-hover: #b7ddff;
-  --primary-fg: #05173a;
-  --accent: #8ecbff;
-  --sky-wash: #12295c;
-  --tag-bg: #1f3f85;
-  --tag-fg: #d4eaff;
+  --bg: #0e0622;
+  --bg-app: #0e0622;
+  --surface: #180b36;
+  --surface-2: #200f47;
+  --border: #35215f;
+  --text: #f0eafc;
+  --muted: #ab9fc8;
+  --primary: #cdb4ff;
+  --primary-hover: #e0d0ff;
+  --primary-fg: #22055a;
+  --accent: #cdb4ff;
+  --sky-wash: #2a1262;
+  --tag-bg: #42198f;
+  --tag-fg: #efe6ff;
   color-scheme: dark;
+}
+
+@theme {
+  --color-sky-50: #f5f0ff;
+  --color-sky-100: #ebe1ff;
+  --color-sky-200: #d9c7ff;
+  --color-sky-300: #c0a2ff;
+  --color-sky-500: #8b55f0;
+  --color-sky-900: #3a0d86;
 }
 
 @theme inline {
